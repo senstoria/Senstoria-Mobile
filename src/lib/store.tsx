@@ -20,6 +20,7 @@ import {
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LIBRARY } from '../data/catalog';
+import type { Locale } from '../i18n';
 
 export type BottleStatus = 'sealed' | 'in_use' | 'finished';
 
@@ -93,11 +94,11 @@ export function todayKey(d = new Date()): string {
   return `${y}-${m}-${day}`;
 }
 
-/** "2026-11-25" → "Rabu, 25 November 2026". */
-export function formatDateId(isoDate: string): string {
+/** "2026-11-25" → "Rabu, 25 November 2026" (id) / "Wednesday, November 25, 2026" (en). */
+export function formatDateId(isoDate: string, locale: Locale = 'id'): string {
   const [y, m, d] = isoDate.split('-').map(Number);
   const date = new Date(y, (m ?? 1) - 1, d ?? 1);
-  return date.toLocaleDateString('id-ID', {
+  return date.toLocaleDateString(locale === 'id' ? 'id-ID' : 'en-US', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',

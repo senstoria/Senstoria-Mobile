@@ -4,6 +4,7 @@
 // marketplace — BUKAN tautan afiliasi (B-5 ditunda founder 25 Nov 2026),
 // dan keterangannya ditulis di bawah tombol. Harga = harga referensi
 // resmi, bukan hasil scrape.
+// Copy layar ini memakai i18n (t.mobile.detail + t.mobile.common).
 import { useState } from 'react';
 import {
   Alert,
@@ -20,9 +21,11 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { PressableScale } from '../lib/feel';
 import { useStore } from '../lib/store';
+import { useLocale } from '../i18n/locale';
+import { fmt, formatCurrency } from '../i18n';
 import { tokens } from '../theme/tokens';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
-import { formatPriceIdr, getPerfume } from '../data/catalog';
+import { getPerfume } from '../data/catalog';
 import { Disc } from '../components/Disc';
 import { NotesRows } from '../components/NotesRows';
 import type { AppNavigationProp, RootStackParamList } from '../navigation/RootNavigator';
@@ -34,6 +37,9 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
   const fontReady = useDisplayFontReady();
   const perfume = getPerfume(route.params.perfumeId);
   const { user, bottles, wishlist, todayWearFor, logWear, removeTodayWear } = useStore();
+  const { locale, t } = useLocale();
+  const L = t.mobile.detail;
+  const C = t.mobile.common;
   const bottle = bottles.find((b) => b.perfumeId === perfume.id);
   const inLibrary = bottle !== undefined;
   const inWishlist = wishlist.includes(perfume.id);
@@ -46,28 +52,24 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
       return;
     }
     if (!bottle) {
-      Alert.alert(
-        'Belum ada di perpustakaan',
-        `${perfume.name} belum ada di perpustakaanmu. Tambah dulu botolnya supaya pemakaian bisa dicatat.`,
-        [
-          { text: 'Batal', style: 'cancel' },
-          {
-            text: 'Tambah botol',
-            onPress: () => navigation.navigate('AddBottle', { perfumeId: perfume.id }),
-          },
-        ],
-      );
+      Alert.alert(L.alertNoBottleTitle, fmt(L.alertNoBottleBody, perfume.name), [
+        { text: C.cancel, style: 'cancel' },
+        {
+          text: C.alertAddBottle,
+          onPress: () => navigation.navigate('AddBottle', { perfumeId: perfume.id }),
+        },
+      ]);
       return;
     }
     if (loggedToday) {
-      Alert.alert('Sudah tercatat hari ini', `${perfume.name} sudah kamu catat pemakaiannya hari ini.`, [
-        { text: 'Batal', style: 'cancel' },
+      Alert.alert(C.alertLoggedTitle, fmt(C.alertLoggedBody, perfume.name), [
+        { text: C.cancel, style: 'cancel' },
         {
-          text: 'Hapus catatan',
+          text: C.alertDeleteLog,
           style: 'destructive',
           onPress: () => removeTodayWear(bottle.id),
         },
-        { text: 'Lihat Jurnal', onPress: () => navigation.navigate('Journal') },
+        { text: C.alertViewJournal, onPress: () => navigation.navigate('Journal') },
       ]);
       return;
     }
@@ -85,7 +87,7 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
 
   const sharePerfume = () => {
     void Share.share({
-      message: `${perfume.name} — ${perfume.brand} ${perfume.concentration} ${perfume.sizeMl} ml, ${formatPriceIdr(perfume.priceIdr)}`,
+      message: `${perfume.name} — ${perfume.brand} ${perfume.concentration} ${perfume.sizeMl} ml, ${formatCurrency(perfume.priceIdr, locale)}`,
     });
   };
 
@@ -100,7 +102,7 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
           style={styles.iconBtn}
           onPress={() => navigation.goBack()}
           accessibilityRole="button"
-          accessibilityLabel="Kembali"
+          accessibilityLabel={C.backAria}
         >
           <Ionicons name="chevron-back" size={24} color={tokens.color.ink} />
         </Pressable>
@@ -109,7 +111,7 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
             style={styles.iconBtn}
             onPress={() => setFavorite((v) => !v)}
             accessibilityRole="button"
-            accessibilityLabel={favorite ? 'Hapus dari favorit' : 'Tambah ke favorit'}
+            accessibilityLabel={favorite ? L.favoriteRemoveAria : L.favoriteAddAria}
           >
             <Ionicons
               name={favorite ? 'heart' : 'heart-outline'}
@@ -121,7 +123,7 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
             style={styles.iconBtn}
             onPress={sharePerfume}
             accessibilityRole="button"
-            accessibilityLabel="Bagikan"
+            accessibilityLabel={L.shareAria}
           >
             <Ionicons name="share-outline" size={21} color={tokens.color.ink} />
           </Pressable>
@@ -137,7 +139,7 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
         {perfume.name}
       </Text>
       <Text style={styles.meta}>
-        {perfume.concentration} · {perfume.sizeMl} ml · {formatPriceIdr(perfume.priceIdr)}
+        {perfume.concentration} · {perfume.sizeMl} ml · {formatCurrency(perfume.priceIdr, locale)}
       </Text>
 
       <View style={styles.status}>
@@ -149,14 +151,14 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
         />
         <Text style={styles.statusText}>
           {inLibrary
-            ? 'Di Perpustakaan · Sedang dipakai'
+            ? L.statusInLibrary
             : inWishlist
-              ? 'Di Wishlist · Ingin coba'
-              : 'Katalog · Belum di perpustakaan'}
+              ? L.statusWishlist
+              : L.statusCatalog}
         </Text>
       </View>
       {bottle ? (
-        <Text style={styles.statusSub}>Ditambahkan {bottle.addedOn}</Text>
+        <Text style={styles.statusSub}>{fmt(L.addedOn, bottle.addedOn)}</Text>
       ) : null}
 
       <NotesRows notes={perfume.notes} />
@@ -165,16 +167,16 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
         onPress={() => navigation.navigate('Finder')}
         accessibilityRole="button"
       >
-        <Text style={styles.finder}>Cari wewangian yang mirip →</Text>
+        <Text style={styles.finder}>{L.finderLink}</Text>
       </Pressable>
 
-      <Text style={styles.marketLabel}>BELI DI MARKETPLACE</Text>
+      <Text style={styles.marketLabel}>{L.marketLabel}</Text>
       <View style={styles.marketRow}>
         <PressableScale
           style={styles.marketBtn}
           onPress={() => openMarketplace('shopee')}
           accessibilityRole="button"
-          accessibilityLabel="Cari di Shopee"
+          accessibilityLabel={L.marketShopeeAria}
         >
           <Text style={styles.marketBtnText}>Shopee</Text>
         </PressableScale>
@@ -182,23 +184,21 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
           style={styles.marketBtn}
           onPress={() => openMarketplace('tokopedia')}
           accessibilityRole="button"
-          accessibilityLabel="Cari di Tokopedia"
+          accessibilityLabel={L.marketTokopediaAria}
         >
           <Text style={styles.marketBtnText}>Tokopedia</Text>
         </PressableScale>
       </View>
-      <Text style={styles.disclosure}>
-        Tautan langsung ke marketplace (bukan afiliasi).
-      </Text>
+      <Text style={styles.disclosure}>{L.disclosure}</Text>
 
       <PressableScale
         style={[styles.cta, loggedToday && styles.ctaLogged]}
         onPress={handleLogWear}
         accessibilityRole="button"
-        accessibilityLabel={loggedToday ? 'Tercatat hari ini' : 'Catat pemakaian hari ini'}
+        accessibilityLabel={loggedToday ? C.logWearCtaLogged : C.logWearCta}
       >
         <Text style={[styles.ctaText, loggedToday && styles.ctaTextLogged]}>
-          {loggedToday ? 'Tercatat hari ini' : 'Catat pemakaian hari ini'}
+          {loggedToday ? C.logWearCtaLogged : C.logWearCta}
         </Text>
       </PressableScale>
     </ScrollView>

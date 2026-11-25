@@ -1153,6 +1153,207 @@ export interface Translations {
     sillage: DescribedOption[];
     repurchase: LabeledOption[];
   };
+  /**
+   * Copy khusus aplikasi mobile (React Native) — layar Fase 2 dan
+   * tambahan PR #7. String web yang sudah ada dipakai ulang bila
+   * maknanya persis (finderQuiz.steps untuk opsi kuis, formatCurrency
+   * untuk harga); sisanya didefinisikan di sini agar wording Indonesia
+   * layar mobile tidak berubah dan EN-nya setia.
+   */
+  mobile: {
+    common: {
+      cancel: string;
+      backAria: string;
+      logWearCta: string;
+      logWearCtaLogged: string;
+      alertLoggedTitle: string;
+      alertLoggedBody: string;
+      alertAddBottle: string;
+      alertDeleteLog: string;
+      alertViewJournal: string;
+    };
+    language: {
+      label: string;
+      aria: string;
+    };
+    tabs: {
+      home: string;
+      library: string;
+      journal: string;
+      catalog: string;
+    };
+    login: {
+      titleLogin: string;
+      titleRegister: string;
+      subtitleLogin: string;
+      subtitleRegister: string;
+      emailLabel: string;
+      emailPlaceholder: string;
+      passwordLabel: string;
+      passwordPlaceholder: string;
+      confirmLabel: string;
+      confirmPlaceholder: string;
+      errorInvalidEmail: string;
+      errorShortPassword: string;
+      errorMismatch: string;
+      submitLogin: string;
+      submitRegister: string;
+      switchToRegister: string;
+      switchToLogin: string;
+      dividerOr: string;
+      demoButton: string;
+      demoNote: string;
+    };
+    addBottle: {
+      topbarTitle: string;
+      title: string;
+      gateTitle: string;
+      gateBody: string;
+      gateCta: string;
+      sizeLabel: string;
+      remainingLabel: string;
+      remainingHint: string;
+      statusLabel: string;
+      statusInUse: string;
+      statusSealed: string;
+      statusFinished: string;
+      errorRemaining: string;
+      saveButton: string;
+      priceNote: string;
+    };
+    story: {
+      topbarTitle: string;
+      title: string;
+      subtitle: string;
+      gateLoginTitle: string;
+      gateLoginBody: string;
+      gateNoBottleTitle: string;
+      gateNoBottleBody: string;
+      gateNoBottleCta: string;
+      perfumeLabel: string;
+      titleLabel: string;
+      titlePlaceholder: string;
+      bodyLabel: string;
+      bodyPlaceholder: string;
+      errorTooShort: string;
+      errorNoPerfume: string;
+      saveButton: string;
+      note: string;
+    };
+    finder: {
+      topbarTitle: string;
+      quizTitle: string;
+      quizSubtitle: string;
+      sectionFamily: string;
+      sectionClimate: string;
+      sectionOccasion: string;
+      sectionLongevity: string;
+      sectionGender: string;
+      sectionBudget: string;
+      sectionAvoid: string;
+      cta: string;
+      note: string;
+      resultsTopbar: string;
+      resultsTitle: string;
+      resultsSubtitle: string;
+      scoreLabel: string;
+      mismatchPrefix: string;
+      retryButton: string;
+    };
+    home: {
+      eyebrow: string;
+      libraryRow: string;
+      libraryValue: string;
+      exploreRow: string;
+      finderLink: string;
+      loginHint: string;
+      alertNoBottleTitle: string;
+      alertNoBottleBody: string;
+      alertAccountTitle: string;
+      alertAccountBody: string;
+      alertSignOut: string;
+      accountAriaSignedIn: string;
+      accountAriaSignedOut: string;
+      searchAria: string;
+    };
+    library: {
+      title: string;
+      count: string;
+      loginBanner: string;
+      searchPlaceholder: string;
+      noResult: string;
+      sectionWearing: string;
+      sectionSealed: string;
+      sectionFinished: string;
+      sectionWishlist: string;
+      tagWearing: string;
+      tagSealed: string;
+      tagFinished: string;
+      tagWishlist: string;
+      remainingMeta: string;
+      deleteAria: string;
+      deleteTitle: string;
+      deleteBody: string;
+      deleteConfirm: string;
+      addButton: string;
+      catalogRow: string;
+    };
+    journal: {
+      title: string;
+      subtitle: string;
+      loginBanner: string;
+      statWears: string;
+      statStories: string;
+      statBottles: string;
+      quickLogTitle: string;
+      quickLogEmpty: string;
+      quickLogCta: string;
+      quickLogCtaAria: string;
+      sectionWears: string;
+      emptyWears: string;
+      sprays: string;
+      sectionStories: string;
+      emptyStories: string;
+      untitledStory: string;
+      writeButton: string;
+      catalogLink: string;
+    };
+    catalog: {
+      title: string;
+      subtitle: string;
+      finderTitle: string;
+      finderSub: string;
+      finderLink: string;
+      searchPlaceholder: string;
+      noResult: string;
+      footnote: string;
+    };
+    detail: {
+      statusInLibrary: string;
+      statusWishlist: string;
+      statusCatalog: string;
+      addedOn: string;
+      finderLink: string;
+      marketLabel: string;
+      marketShopeeAria: string;
+      marketTokopediaAria: string;
+      disclosure: string;
+      favoriteAddAria: string;
+      favoriteRemoveAria: string;
+      shareAria: string;
+      alertNoBottleTitle: string;
+      alertNoBottleBody: string;
+    };
+    empty: {
+      eyebrow: string;
+      title: string;
+      body: string;
+      cta: string;
+      catalogLink: string;
+      note: string;
+      signin: string;
+    };
+  };
 }
 import { en } from './en';
 import { id } from './id';

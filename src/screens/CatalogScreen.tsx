@@ -2,19 +2,24 @@
 // Hanya 2 parfum terverifikasi; jumlah ditampilkan apa adanya.
 // Search memfilter nama/merek/notes. Baris menavigasi ke Detail.
 // Harga = harga referensi resmi (bukan scrape marketplace).
+// Copy layar ini memakai i18n (t.mobile.catalog).
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useLocale } from '../i18n/locale';
+import { fmt, formatCurrency } from '../i18n';
 import { tokens } from '../theme/tokens';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
-import { PERFUMES, formatPriceIdr } from '../data/catalog';
+import { PERFUMES } from '../data/catalog';
 import { Disc } from '../components/Disc';
 import type { AppNavigationProp } from '../navigation/RootNavigator';
 
 export default function CatalogScreen() {
   const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
+  const { locale, t } = useLocale();
+  const L = t.mobile.catalog;
   const [query, setQuery] = useState('');
 
   const visible = useMemo(() => {
@@ -33,26 +38,24 @@ export default function CatalogScreen() {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={[styles.title, { fontFamily: displayFontFamily(fontReady) }]}>Katalog</Text>
-      <Text style={styles.subtitle}>{PERFUMES.length} parfum terverifikasi.</Text>
+      <Text style={[styles.title, { fontFamily: displayFontFamily(fontReady) }]}>{L.title}</Text>
+      <Text style={styles.subtitle}>{fmt(L.subtitle, PERFUMES.length)}</Text>
 
       <Pressable
         style={styles.finderCard}
         onPress={() => navigation.navigate('Finder')}
         accessibilityRole="button"
       >
-        <Text style={styles.finderTitle}>Cari wewangian yang cocok</Text>
-        <Text style={styles.finderSub}>
-          Jawab 7 pertanyaan singkat — skor kecocokan dihitung dari seleramu.
-        </Text>
-        <Text style={styles.finderLink}>Mulai kuis →</Text>
+        <Text style={styles.finderTitle}>{L.finderTitle}</Text>
+        <Text style={styles.finderSub}>{L.finderSub}</Text>
+        <Text style={styles.finderLink}>{L.finderLink}</Text>
       </Pressable>
 
       <View style={styles.search}>
         <Ionicons name="search" size={19} color={tokens.color.ink3} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Cari parfum, merek, atau notes"
+          placeholder={L.searchPlaceholder}
           placeholderTextColor={tokens.color.ink3}
           value={query}
           onChangeText={setQuery}
@@ -62,9 +65,7 @@ export default function CatalogScreen() {
       </View>
 
       {visible.length === 0 ? (
-        <Text style={styles.noResult}>
-          Tidak ada parfum yang cocok dengan &ldquo;{query.trim()}&rdquo;.
-        </Text>
+        <Text style={styles.noResult}>{fmt(L.noResult, query.trim())}</Text>
       ) : (
         visible.map((p) => (
           <Pressable
@@ -79,16 +80,14 @@ export default function CatalogScreen() {
               <Text style={styles.rowMeta}>
                 {p.brand} · {p.concentration} {p.sizeMl} ml
               </Text>
-              <Text style={styles.rowPrice}>{formatPriceIdr(p.priceIdr)}</Text>
+              <Text style={styles.rowPrice}>{formatCurrency(p.priceIdr, locale)}</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={tokens.color.ink3} />
           </Pressable>
         ))
       )}
 
-      <Text style={styles.footnote}>
-        Harga referensi resmi. Pembelian lewat marketplace.
-      </Text>
+      <Text style={styles.footnote}>{L.footnote}</Text>
     </ScrollView>
   );
 }

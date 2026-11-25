@@ -2,6 +2,8 @@
 // Botol tersimpan di store lokal perangkat (AsyncStorage), bukan server.
 // Satu bottle record adalah satu-satunya sumber ukuran/sisa/status —
 // tidak ada penghitung terpisah (aturan PRD BR-01).
+// Copy layar ini memakai i18n (t.mobile.addBottle); harga memakai
+// formatCurrency(amount, locale) agar pemisah ribuan mengikuti bahasa.
 import { useState } from 'react';
 import {
   Pressable,
@@ -15,21 +17,17 @@ import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { PressableScale } from '../lib/feel';
 import { useStore, type BottleStatus } from '../lib/store';
+import { useLocale } from '../i18n/locale';
+import { fmt, formatCurrency } from '../i18n';
 import { tokens } from '../theme/tokens';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
-import { PERFUMES, formatPriceIdr, type Perfume } from '../data/catalog';
+import { PERFUMES, type Perfume } from '../data/catalog';
 import { Disc } from '../components/Disc';
 import type { AppNavigationProp, RootStackParamList } from '../navigation/RootNavigator';
 
 type AddBottleRoute = RouteProp<RootStackParamList, 'AddBottle'>;
 
 const SIZES = [30, 50, 75, 100];
-
-const STATUSES: { value: BottleStatus; label: string }[] = [
-  { value: 'in_use', label: 'Sedang dipakai' },
-  { value: 'sealed', label: 'Tersegel' },
-  { value: 'finished', label: 'Habis' },
-];
 
 function Chip({
   label,
@@ -56,6 +54,15 @@ export default function AddBottleScreen({ route }: { route: AddBottleRoute }) {
   const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
   const { user, addBottle } = useStore();
+  const { locale, t } = useLocale();
+  const L = t.mobile.addBottle;
+  const C = t.mobile.common;
+
+  const STATUSES: { value: BottleStatus; label: string }[] = [
+    { value: 'in_use', label: L.statusInUse },
+    { value: 'sealed', label: L.statusSealed },
+    { value: 'finished', label: L.statusFinished },
+  ];
 
   const initialPerfume =
     PERFUMES.find((p) => p.id === route.params?.perfumeId) ?? PERFUMES[0] as Perfume;
@@ -75,7 +82,7 @@ export default function AddBottleScreen({ route }: { route: AddBottleRoute }) {
   const save = () => {
     const remainingMl = Number(remaining.replace(',', '.'));
     if (!Number.isFinite(remainingMl) || remainingMl < 0 || remainingMl > sizeMl) {
-      setError(`Sisa isi harus angka 0 sampai ${sizeMl} ml.`);
+      setError(fmt(L.errorRemaining, sizeMl));
       return;
     }
     setError('');
@@ -93,26 +100,26 @@ export default function AddBottleScreen({ route }: { route: AddBottleRoute }) {
     return (
       <View style={styles.gate}>
         <Text style={[styles.gateTitle, { fontFamily: displayFontFamily(fontReady) }]}>
-          Masuk dulu.
+          {L.gateTitle}
         </Text>
-        <Text style={styles.gateBody}>
-          Botol tersimpan di akun demo perangkat ini. Masuk dulu supaya botol
-          yang kamu tambah tidak hilang saat ganti perangkat.
-        </Text>
+        <Text style={styles.gateBody}>{L.gateBody}</Text>
         <PressableScale
           style={styles.cta}
           onPress={() => navigation.navigate('Login')}
           accessibilityRole="button"
-          accessibilityLabel="Masuk"
+          accessibilityLabel={L.gateCta}
         >
-          <Text style={styles.ctaText}>Masuk</Text>
+          <Text style={styles.ctaText}>{L.gateCta}</Text>
         </PressableScale>
         <Pressable onPress={() => navigation.goBack()} accessibilityRole="button">
-          <Text style={styles.link}>Batal</Text>
+          <Text style={styles.link}>{C.cancel}</Text>
         </Pressable>
       </View>
     );
   }
+
+  const remainingPct =
+    sizeMl > 0 ? Math.round(((Number(remaining.replace(',', '.')) || 0) / sizeMl) * 100) : 0;
 
   return (
     <ScrollView
@@ -126,16 +133,16 @@ export default function AddBottleScreen({ route }: { route: AddBottleRoute }) {
           style={styles.iconBtn}
           onPress={() => navigation.goBack()}
           accessibilityRole="button"
-          accessibilityLabel="Kembali"
+          accessibilityLabel={C.backAria}
         >
           <Ionicons name="chevron-back" size={24} color={tokens.color.ink} />
         </Pressable>
-        <Text style={styles.topbarTitle}>Tambah botol</Text>
+        <Text style={styles.topbarTitle}>{L.topbarTitle}</Text>
         <View style={styles.iconBtnSpacer} />
       </View>
 
       <Text style={[styles.title, { fontFamily: displayFontFamily(fontReady) }]}>
-        Parfum apa?
+        {L.title}
       </Text>
 
       {PERFUMES.map((p) => {
@@ -155,12 +162,12 @@ export default function AddBottleScreen({ route }: { route: AddBottleRoute }) {
                 {p.brand} · {p.concentration} {p.sizeMl} ml
               </Text>
             </View>
-            <Text style={styles.perfumePrice}>{formatPriceIdr(p.priceIdr)}</Text>
+            <Text style={styles.perfumePrice}>{formatCurrency(p.priceIdr, locale)}</Text>
           </Pressable>
         );
       })}
 
-      <Text style={styles.label}>UKURAN BOTOL</Text>
+      <Text style={styles.label}>{L.sizeLabel}</Text>
       <View style={styles.chipRow}>
         {SIZES.map((s) => (
           <Chip
@@ -176,7 +183,7 @@ export default function AddBottleScreen({ route }: { route: AddBottleRoute }) {
         ))}
       </View>
 
-      <Text style={styles.label}>SISA ISI (ML)</Text>
+      <Text style={styles.label}>{L.remainingLabel}</Text>
       <TextInput
         style={styles.input}
         placeholder={`0–${sizeMl}`}
@@ -190,10 +197,10 @@ export default function AddBottleScreen({ route }: { route: AddBottleRoute }) {
         returnKeyType="done"
       />
       <Text style={styles.hint}>
-        {`Sisa ${remaining || '–'} ml dari ${sizeMl} ml (${sizeMl > 0 ? Math.round(((Number(remaining.replace(',', '.')) || 0) / sizeMl) * 100) : 0}%).`}
+        {fmt(L.remainingHint, remaining || '–', sizeMl, remainingPct)}
       </Text>
 
-      <Text style={styles.label}>STATUS</Text>
+      <Text style={styles.label}>{L.statusLabel}</Text>
       <View style={styles.chipRow}>
         {STATUSES.map((s) => (
           <Chip
@@ -211,13 +218,12 @@ export default function AddBottleScreen({ route }: { route: AddBottleRoute }) {
         style={styles.cta}
         onPress={save}
         accessibilityRole="button"
-        accessibilityLabel="Simpan botol"
+        accessibilityLabel={L.saveButton}
       >
-        <Text style={styles.ctaText}>Simpan botol</Text>
+        <Text style={styles.ctaText}>{L.saveButton}</Text>
       </PressableScale>
       <Text style={styles.note}>
-        Harga referensi {formatPriceIdr(perfume.priceIdr)} dicatat otomatis
-        sebagai nilai botol.
+        {fmt(L.priceNote, formatCurrency(perfume.priceIdr, locale))}
       </Text>
     </ScrollView>
   );

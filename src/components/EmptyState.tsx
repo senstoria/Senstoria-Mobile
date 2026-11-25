@@ -12,6 +12,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { PressableScale } from '../lib/feel';
 import { useStore } from '../lib/store';
+import { useLocale } from '../i18n/locale';
 import { tokens } from '../theme/tokens';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
 import { Rings } from '../components/Rings';
@@ -21,6 +22,8 @@ export function EmptyLibraryState() {
   const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
   const { user } = useStore();
+  const { t } = useLocale();
+  const L = t.mobile.empty;
 
   const handleAddFirst = () => {
     if (!user) {
@@ -41,31 +44,28 @@ export function EmptyLibraryState() {
           ]}
         />
       </View>
-      <Text style={styles.eyebrow}>PERTAMA KALI</Text>
+      <Text style={styles.eyebrow}>{L.eyebrow}</Text>
       <Text style={[styles.title, { fontFamily: displayFontFamily(fontReady) }]}>
-        Pasar baru{'\n'}buka.
+        {L.title}
       </Text>
-      <Text style={styles.body}>
-        Belum ada botol di perpustakaanmu. Tambah parfum pertamamu, atau
-        jelajahi katalog dulu.
-      </Text>
+      <Text style={styles.body}>{L.body}</Text>
       <PressableScale
         style={styles.cta}
         onPress={handleAddFirst}
         accessibilityRole="button"
-        accessibilityLabel="Tambah botol pertama"
+        accessibilityLabel={L.cta}
       >
-        <Text style={styles.ctaText}>Tambah botol pertama</Text>
+        <Text style={styles.ctaText}>{L.cta}</Text>
       </PressableScale>
       <Pressable onPress={() => navigation.navigate('Catalog')} accessibilityRole="button">
-        <Text style={styles.link}>Jelajahi katalog →</Text>
+        <Text style={styles.link}>{L.catalogLink}</Text>
       </Pressable>
-      <Text style={styles.note}>Katalog berisi 2 parfum terverifikasi.</Text>
+      <Text style={styles.note}>{L.note}</Text>
       <Pressable
         onPress={() => navigation.navigate('Login')}
         accessibilityRole="button"
       >
-        <Text style={styles.signin}>Sudah punya akun? Masuk</Text>
+        <Text style={styles.signin}>{L.signin}</Text>
       </Pressable>
     </View>
   );

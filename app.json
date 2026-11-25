@@ -15,7 +15,8 @@
     "version": "0.1.0",
     "web": {},
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-localization"
     ]
   }
 }

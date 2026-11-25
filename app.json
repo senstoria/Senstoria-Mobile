@@ -13,6 +13,9 @@
     "slug": "senstoria",
     "userInterfaceStyle": "light",
     "version": "0.1.0",
-    "web": {}
+    "web": {},
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

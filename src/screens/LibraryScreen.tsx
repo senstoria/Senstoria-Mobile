@@ -1,9 +1,9 @@
 // Library — mode daftar padat (mockup 03-library-dense).
 // Kerangka Fase 2 (demo, tanpa Firebase): botol dibaca dari store lokal
-// perangkat. Tag status mengikuti aturan kontras putih: DIPAKAI = fill
-// hot pink solid + teks on-accent #1A0A12 (5.74:1); TERSEGEL/HABIS/
-// INGIN COBA = tint netral + teks ink-2 (6.18:1). Tint hot pink + teks
-// pink tidak dipakai meski kini 4.89:1 — pola fill solid + on-accent
+// perangkat. Tag status mengikuti aturan kontras Cream Grey: DIPAKAI = fill
+// Lipstick Pink solid + teks on-accent #1A0A12 (6.10:1); TERSEGEL/HABIS/
+// INGIN COBA = tint netral + teks ink-2 (5.82:1). Tint Lipstick Pink + teks
+// pink tidak dipakai meski kini 5.45:1 — pola fill solid + on-accent
 // dipertahankan. Search memfilter baris nyata (nama/merek). Bila lemari
 // kosong (0 botol + 0 wishlist), tampil EmptyLibraryState. Ubah data
 // (tambah/hapus) butuh sesi demo — bila belum masuk, arahkan ke Login.

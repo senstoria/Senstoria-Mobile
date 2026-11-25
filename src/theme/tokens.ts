@@ -1,50 +1,48 @@
-// Design tokens — palet Navy / White / Hot Pink.
-// Keputusan founder 25 Nov 2026 19:15 WIB (dari Reel yang ia kirim):
-// kombinasi Navy #0F1B3D / White #FFFFFF / Hot Pink #FF3D8B.
-// Palet ini MENGGANTIKAN token D di atas putih: pink D #F4528B (fill)
-// dan #C84372 (teks), serta teal ink #0A1417 dan disc #12262B.
-// Perintah "buang warna pink" sebelumnya digantikan kombinasi ini —
-// pink tidak hilang total, pink D diganti Hot Pink #FF3D8B.
-// Ground tetap putih; Baloo 2 display dan FEEL tone 'lively' tidak berubah.
-// (Ground putih sementara dari keputusan 16:57 WIB tetap berlaku; foto
-// full-bleed / teal malam arah D tetap diparkir, bukan dihapus.)
+// Design tokens — palet Cream Grey / Sapphire Navy / Lipstick Pink.
+// Keputusan founder 25 Nov 2026 21:02 WIB (tag "(fashion)"): kombinasi
+// Cream Grey #EDE8E0 / Sapphire Navy #223366 / Lipstick Pink #EC5CAB.
+// Palet ini MENGGANTIKAN palet Navy / Hot Pink dari PR #6: Navy #0F1B3D,
+// ground putih #FFFFFF, dan Hot Pink #FF3D8B (teks #C2185B).
+// Ground kini Cream Grey; Baloo 2 display dan FEEL tone 'lively' tidak
+// berubah. (Foto full-bleed / teal malam arah D tetap diparkir, bukan
+// dihapus.)
 //
-// Kontras terukur dengan rumus WCAG (di atas #FFFFFF, kecuali disebut lain):
-//   ink #0F1B3D          16.87:1  (teks utama)
-//   ink-2 #55617E         6.18:1  (meta, sub)
-//   ink-3 #5B6A86         5.45:1  (caps label, metadata kecil)
-//   accent-text #C2185B   5.87:1  (eyebrow, link, label pink — hot pink
-//                                  #FF3D8B di atas putih hanya 3.34:1,
-//                                  dilarang sebagai teks; #C2185B adalah
-//                                  pink yang digelapkan pada hue yang
-//                                  sama, 336°)
-//   on-accent #1A0A12 di atas accent fill #FF3D8B  5.74:1 (teks CTA)
-//   disc ink #F7F3EA di atas disc navy #0F1B3D    15.24:1 (monogram)
-// Catatan: accent-text #C2185B di atas tint hot pink #FFE3EE = 4.89:1 —
+// Kontras terukur dengan rumus WCAG (di atas #EDE8E0, kecuali disebut lain):
+//   ink #223366          9.93:1  (teks utama)
+//   ink-2 #4A5878        5.82:1  (meta, sub)
+//   ink-3 #55648A        4.82:1  (caps label, metadata kecil)
+//   accent-text #A32668  5.67:1  (eyebrow, link, label pink — Lipstick
+//                                  Pink #EC5CAB di atas Cream Grey hanya
+//                                  2.58:1, dilarang sebagai teks; #A32668
+//                                  adalah pink yang digelapkan pada hue
+//                                  yang sama, 327°)
+//   on-accent #1A0A12 di atas accent fill #EC5CAB  6.10:1 (teks CTA)
+//   disc ink #F7F3EA di atas disc navy #223366    10.94:1 (monogram)
+// Catatan: accent-text #A32668 di atas tint Lipstick Pink #FADCEF = 5.45:1 —
 // lolos, tapi elemen pink kecil (pill tab terpilih, tag DIPAKAI) TETAP
-// memakai fill pink SOLID + teks on-accent #1A0A12 (5.74:1), bukan
+// memakai fill pink SOLID + teks on-accent #1A0A12 (6.10:1), bukan
 // tint + teks pink, demi konsistensi dengan pola sebelumnya.
 export const tokens = {
   color: {
-    ground: '#FFFFFF',
-    ink: '#0F1B3D',
-    ink2: '#55617E',
-    ink3: '#5B6A86',
-    rule: 'rgba(15, 27, 61, 0.14)',
-    accent: '#FF3D8B',
-    accentText: '#C2185B',
+    ground: '#EDE8E0',
+    ink: '#223366',
+    ink2: '#4A5878',
+    ink3: '#55648A',
+    rule: 'rgba(34, 51, 102, 0.14)',
+    accent: '#EC5CAB',
+    accentText: '#A32668',
     onAccent: '#1A0A12',
-    accentTint: '#FFE3EE',
-    disc: '#0F1B3D',
+    accentTint: '#FADCEF',
+    disc: '#223366',
     discInk: '#F7F3EA',
     glass: 'rgba(255, 255, 255, 0.92)',
-    // Cincin difusi di atas putih: goresan navy sangat redup (dekoratif,
-    // bukan teks — tidak ada syarat kontras). Hot pink dipakai satu cincin
+    // Cincin difusi di atas Cream Grey: goresan navy sangat redup (dekoratif,
+    // bukan teks — tidak ada syarat kontras). Lipstick Pink dipakai satu cincin
     // aksen pada hero cakram. Nama kunci ringTeal adalah warisan arah D
     // (dulu teal #0A1417); nilainya kini navy, nama tidak diubah supaya
     // pemakai (HomeScreen, EmptyState) tidak berubah.
-    ringTeal: ['rgba(15, 27, 61, 0.12)', 'rgba(15, 27, 61, 0.08)', 'rgba(15, 27, 61, 0.05)'],
-    ringPink: ['rgba(255, 61, 139, 0.35)', 'rgba(255, 61, 139, 0.2)'],
+    ringTeal: ['rgba(34, 51, 102, 0.12)', 'rgba(34, 51, 102, 0.08)', 'rgba(34, 51, 102, 0.05)'],
+    ringPink: ['rgba(236, 92, 171, 0.35)', 'rgba(236, 92, 171, 0.2)'],
   },
   fontFamily: {
     // Nama family persis seperti yang didaftarkan useFonts di App.tsx

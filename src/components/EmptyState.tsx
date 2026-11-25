@@ -6,11 +6,12 @@
 // keterbacaan. Penyesuaian dari mockup: di sini state hidup di dalam
 // tab Library (tab bar tetap terlihat agar pengguna bisa pindah) —
 // mockup menampilkan empty sebagai layar sampul tanpa tab bar.
-// "Tambah botol" adalah placeholder jujur: alur tambah botol hadir di
-// Fase 2 (Alert, bukan layar palsu).
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+// Kerangka Fase 2 (demo): "Tambah botol" dan "Masuk" membuka layar
+// sungguhan (bukan Alert placeholder).
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { PressableScale } from '../lib/feel';
+import { useStore } from '../lib/store';
 import { tokens } from '../theme/tokens';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
 import { Rings } from '../components/Rings';
@@ -19,6 +20,15 @@ import type { AppNavigationProp } from '../navigation/RootNavigator';
 export function EmptyLibraryState() {
   const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
+  const { user } = useStore();
+
+  const handleAddFirst = () => {
+    if (!user) {
+      navigation.navigate('Login');
+      return;
+    }
+    navigation.navigate('AddBottle', {});
+  };
   return (
     <View style={styles.host}>
       <View style={styles.ringsWrap} pointerEvents="none">
@@ -41,9 +51,7 @@ export function EmptyLibraryState() {
       </Text>
       <PressableScale
         style={styles.cta}
-        onPress={() =>
-          Alert.alert('Tambah botol', 'Alur tambah botol hadir di Fase 2.')
-        }
+        onPress={handleAddFirst}
         accessibilityRole="button"
         accessibilityLabel="Tambah botol pertama"
       >
@@ -54,9 +62,7 @@ export function EmptyLibraryState() {
       </Pressable>
       <Text style={styles.note}>Katalog berisi 2 parfum terverifikasi.</Text>
       <Pressable
-        onPress={() =>
-          Alert.alert('Masuk', 'Autentikasi akun hadir di Fase 2.')
-        }
+        onPress={() => navigation.navigate('Login')}
         accessibilityRole="button"
       >
         <Text style={styles.signin}>Sudah punya akun? Masuk</Text>

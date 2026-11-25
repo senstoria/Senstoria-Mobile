@@ -19,24 +19,60 @@ import type { RouteProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { PressableScale } from '../lib/feel';
+import { useStore } from '../lib/store';
 import { tokens } from '../theme/tokens';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
-import { LIBRARY, formatPriceIdr, getPerfume } from '../data/catalog';
+import { formatPriceIdr, getPerfume } from '../data/catalog';
 import { Disc } from '../components/Disc';
 import { NotesRows } from '../components/NotesRows';
-import type { RootStackParamList } from '../navigation/RootNavigator';
+import type { AppNavigationProp, RootStackParamList } from '../navigation/RootNavigator';
 
 type DetailRoute = RouteProp<RootStackParamList, 'Detail'>;
 
 export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
   const perfume = getPerfume(route.params.perfumeId);
-  const inLibrary = LIBRARY.bottles.some((b) => b.perfumeId === perfume.id);
-  const inWishlist = LIBRARY.wishlist.includes(perfume.id);
-  const bottle = LIBRARY.bottles.find((b) => b.perfumeId === perfume.id);
+  const { user, bottles, wishlist, todayWearFor, logWear, removeTodayWear } = useStore();
+  const bottle = bottles.find((b) => b.perfumeId === perfume.id);
+  const inLibrary = bottle !== undefined;
+  const inWishlist = wishlist.includes(perfume.id);
   const [favorite, setFavorite] = useState(false);
-  const [loggedToday, setLoggedToday] = useState(false);
+  const loggedToday = bottle ? todayWearFor(bottle.id) !== undefined : false;
+
+  const handleLogWear = () => {
+    if (!user) {
+      navigation.navigate('Login');
+      return;
+    }
+    if (!bottle) {
+      Alert.alert(
+        'Belum ada di perpustakaan',
+        `${perfume.name} belum ada di perpustakaanmu. Tambah dulu botolnya supaya pemakaian bisa dicatat.`,
+        [
+          { text: 'Batal', style: 'cancel' },
+          {
+            text: 'Tambah botol',
+            onPress: () => navigation.navigate('AddBottle', { perfumeId: perfume.id }),
+          },
+        ],
+      );
+      return;
+    }
+    if (loggedToday) {
+      Alert.alert('Sudah tercatat hari ini', `${perfume.name} sudah kamu catat pemakaiannya hari ini.`, [
+        { text: 'Batal', style: 'cancel' },
+        {
+          text: 'Hapus catatan',
+          style: 'destructive',
+          onPress: () => removeTodayWear(bottle.id),
+        },
+        { text: 'Lihat Jurnal', onPress: () => navigation.navigate('Journal') },
+      ]);
+      return;
+    }
+    logWear(bottle.id, bottle.perfumeId);
+  };
 
   const openMarketplace = (where: 'shopee' | 'tokopedia') => {
     const q = encodeURIComponent(`${perfume.brand} ${perfume.name}`);
@@ -126,9 +162,7 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
       <NotesRows notes={perfume.notes} />
 
       <Pressable
-        onPress={() =>
-          Alert.alert('Scent Finder', 'Pencarian parfum serupa hadir di Fase 2.')
-        }
+        onPress={() => navigation.navigate('Finder')}
         accessibilityRole="button"
       >
         <Text style={styles.finder}>Cari wewangian yang mirip →</Text>
@@ -159,7 +193,7 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
 
       <PressableScale
         style={[styles.cta, loggedToday && styles.ctaLogged]}
-        onPress={() => setLoggedToday((v) => !v)}
+        onPress={handleLogWear}
         accessibilityRole="button"
         accessibilityLabel={loggedToday ? 'Tercatat hari ini' : 'Catat pemakaian hari ini'}
       >

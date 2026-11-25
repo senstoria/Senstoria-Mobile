@@ -1,6 +1,8 @@
-// Root navigator — arah D: tab bar pil mengambang + Detail sebagai layar
-// push (tanpa tab bar). React Navigation (native stack + bottom tabs),
-// bukan Expo Router — keputusan scaffold Fase 1.
+// Root navigator — arah D: tab bar pil mengambang + layar push (tanpa
+// tab bar): Detail, Login, AddBottle, StoryComposer, Finder.
+// React Navigation (native stack + bottom tabs), bukan Expo Router —
+// keputusan scaffold Fase 1. Kerangka Fase 2 (demo, tanpa Firebase):
+// semua layar terhubung lewat stack ini.
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -11,6 +13,10 @@ import LibraryScreen from '../screens/LibraryScreen';
 import JournalScreen from '../screens/JournalScreen';
 import CatalogScreen from '../screens/CatalogScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
+import LoginScreen from '../screens/LoginScreen';
+import AddBottleScreen from '../screens/AddBottleScreen';
+import StoryComposerScreen from '../screens/StoryComposerScreen';
+import FinderScreen from '../screens/FinderScreen';
 import FloatingTabBar from '../components/TabBar';
 
 export type TabParamList = {
@@ -23,10 +29,14 @@ export type TabParamList = {
 export type RootStackParamList = {
   Tabs: undefined;
   Detail: { perfumeId: string };
+  Login: undefined;
+  AddBottle: { perfumeId?: string };
+  StoryComposer: undefined;
+  Finder: undefined;
 };
 
 /** Tipe navigasi gabungan untuk layar di dalam tab (boleh pindah tab
- *  maupun push ke Detail). */
+ *  maupun push ke layar stack). */
 export type AppNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<TabParamList>,
   NativeStackNavigationProp<RootStackParamList>
@@ -54,6 +64,10 @@ export default function RootNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Tabs" component={Tabs} />
       <Stack.Screen name="Detail" component={ProductDetailScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="AddBottle" component={AddBottleScreen} />
+      <Stack.Screen name="StoryComposer" component={StoryComposerScreen} />
+      <Stack.Screen name="Finder" component={FinderScreen} />
     </Stack.Navigator>
   );
 }

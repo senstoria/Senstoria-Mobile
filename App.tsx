@@ -86,13 +86,15 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   // Frame perangkat (iPhone) untuk preview web. Lebar = layar 430 +
-  // bezel 12 kiri-kanan; tinggi = min(932, viewport − 40) via flex +
-  // maxHeight; terpusat vertikal dan horizontal oleh webOuter.
+  // bezel 12 kiri-kanan; tinggi mengikuti viewport (viewport − 40
+  // via flex + paddingVertical webOuter) — tanpa batas 932px, sesuai
+  // permintaan founder; di jendela yang sangat tinggi frame ikut
+  // memanjang dan tidak lagi berproporsi iPhone persis.
+  // Terpusat vertikal dan horizontal oleh webOuter.
   webFrame: {
     width: '100%',
     maxWidth: 454,
     flex: 1,
-    maxHeight: 932,
     backgroundColor: '#2B2B2E',
     borderRadius: 48,
     paddingHorizontal: 12,

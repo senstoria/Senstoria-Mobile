@@ -85,16 +85,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 20,
   },
-  // Frame perangkat (iPhone) untuk preview web. Lebar = layar 430 +
-  // bezel 12 kiri-kanan; tinggi mengikuti viewport (viewport − 40
-  // via flex + paddingVertical webOuter) — tanpa batas 932px, sesuai
-  // permintaan founder; di jendela yang sangat tinggi frame ikut
-  // memanjang dan tidak lagi berproporsi iPhone persis.
-  // Terpusat vertikal dan horizontal oleh webOuter.
+  // Frame perangkat (iPhone) untuk preview web. Geometri iPhone 16 Plus
+  // yang benar: layar 430×932 pt, bezel samping 12, bezel atas 40
+  // (tempat dynamic island), bezel bawah 28 — jadi ukuran luar frame
+  // 454×1000. Rasio luar dikunci 454:1000 lewat aspectRatio supaya HP
+  // selalu berproporsi iPhone berapa pun ukuran jendelanya: di jendela
+  // pendek frame menyusut proporsional (lebih kecil, bukan gepeng).
+  // height '100%' = viewport − 40 (paddingVertical webOuter), dibatasi
+  // maxHeight 1000; lebar mengikuti rasio, dibatasi maxWidth 454.
+  // Catatan: width '100%' dan flex: 1 sengaja TIDAK dipakai — di CSS
+  // (react-native-web) aspect-ratio diabaikan bila width dan height
+  // keduanya definitif, jadi keduanya harus auto/height saja agar rasio
+  // berlaku. PR #4 memakai maxHeight 932 untuk SELURUH frame (layar di
+  // dalamnya jadi 864) — itu menyimpang dari proporsi asli; revisi ini
+  // meluruskannya ke 454:1000. Terpusat vertikal dan horizontal oleh
+  // webOuter.
   webFrame: {
-    width: '100%',
+    height: '100%',
+    aspectRatio: 454 / 1000,
     maxWidth: 454,
-    flex: 1,
+    maxHeight: 1000,
     backgroundColor: '#2B2B2E',
     borderRadius: 48,
     paddingHorizontal: 12,

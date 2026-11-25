@@ -7,15 +7,18 @@
 // dipertahankan. Search memfilter baris nyata (nama/merek). Bila lemari
 // kosong (0 botol + 0 wishlist), tampil EmptyLibraryState. Ubah data
 // (tambah/hapus) butuh sesi demo — bila belum masuk, arahkan ke Login.
+// Copy layar ini memakai i18n (t.mobile.library).
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { PressableScale } from '../lib/feel';
 import { useStore, type LocalBottle } from '../lib/store';
+import { useLocale } from '../i18n/locale';
+import { fmt, formatCurrency } from '../i18n';
 import { tokens } from '../theme/tokens';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
-import { formatPriceIdr, getPerfume, type Perfume } from '../data/catalog';
+import { getPerfume, type Perfume } from '../data/catalog';
 import { Disc } from '../components/Disc';
 import { EmptyLibraryState } from '../components/EmptyState';
 import type { AppNavigationProp } from '../navigation/RootNavigator';
@@ -28,6 +31,7 @@ function LibraryRow({
   remainingMl,
   onPress,
   onDelete,
+  deleteAria,
 }: {
   perfume: Perfume;
   tag: string;
@@ -36,7 +40,10 @@ function LibraryRow({
   remainingMl?: number;
   onPress: () => void;
   onDelete?: () => void;
+  deleteAria?: string;
 }) {
+  const { t } = useLocale();
+  const L = t.mobile.library;
   return (
     <View style={styles.row}>
       <Pressable style={styles.rowMain} onPress={onPress} accessibilityRole="button">
@@ -45,7 +52,7 @@ function LibraryRow({
           <Text style={styles.rowName}>{perfume.name}</Text>
           <Text style={styles.rowMeta}>
             {perfume.brand} · {perfume.concentration} {perfume.sizeMl} ml
-            {remainingMl !== undefined ? ` · sisa ${remainingMl} ml` : ''}
+            {remainingMl !== undefined ? ` · ${fmt(L.remainingMeta, remainingMl)}` : ''}
           </Text>
         </View>
         <View style={[styles.tag, tagStyle]}>
@@ -57,7 +64,7 @@ function LibraryRow({
           style={styles.deleteBtn}
           onPress={onDelete}
           accessibilityRole="button"
-          accessibilityLabel={`Hapus ${perfume.name} dari perpustakaan`}
+          accessibilityLabel={deleteAria}
         >
           <Ionicons name="trash-outline" size={19} color={tokens.color.accentText} />
         </Pressable>
@@ -70,6 +77,9 @@ export default function LibraryScreen() {
   const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
   const { user, bottles, wishlist, valuationIdr, deleteBottle } = useStore();
+  const { locale, t } = useLocale();
+  const L = t.mobile.library;
+  const C = t.mobile.common;
   const [query, setQuery] = useState('');
 
   const bottlePerfume = (b: LocalBottle) => getPerfume(b.perfumeId);
@@ -94,9 +104,9 @@ export default function LibraryScreen() {
 
   const confirmDelete = (b: LocalBottle) => {
     const p = bottlePerfume(b);
-    Alert.alert('Hapus botol?', `${p.name} (${p.brand}) akan dihapus dari perpustakaanmu. Catatan pemakaiannya ikut terhapus.`, [
-      { text: 'Batal', style: 'cancel' },
-      { text: 'Hapus', style: 'destructive', onPress: () => deleteBottle(b.id) },
+    Alert.alert(L.deleteTitle, fmt(L.deleteBody, p.name, p.brand), [
+      { text: C.cancel, style: 'cancel' },
+      { text: L.deleteConfirm, style: 'destructive', onPress: () => deleteBottle(b.id) },
     ]);
   };
 
@@ -123,10 +133,10 @@ export default function LibraryScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Text style={[styles.title, { fontFamily: displayFontFamily(fontReady) }]}>
-        Perpustakaan
+        {L.title}
       </Text>
       <Text style={styles.count}>
-        {bottles.length} botol · {formatPriceIdr(valuationIdr)}
+        {fmt(L.count, bottles.length, formatCurrency(valuationIdr, locale))}
       </Text>
 
       {!user ? (
@@ -135,9 +145,7 @@ export default function LibraryScreen() {
           onPress={() => navigation.navigate('Login')}
           accessibilityRole="button"
         >
-          <Text style={styles.loginBannerText}>
-            Masuk untuk mengubah perpustakaanmu (mode demo) →
-          </Text>
+          <Text style={styles.loginBannerText}>{L.loginBanner}</Text>
         </Pressable>
       ) : null}
 
@@ -145,7 +153,7 @@ export default function LibraryScreen() {
         <Ionicons name="search" size={19} color={tokens.color.ink3} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Cari di perpustakaan"
+          placeholder={L.searchPlaceholder}
           placeholderTextColor={tokens.color.ink3}
           value={query}
           onChangeText={setQuery}
@@ -155,70 +163,71 @@ export default function LibraryScreen() {
       </View>
 
       {!hasResults ? (
-        <Text style={styles.noResult}>
-          Tidak ada botol yang cocok dengan &ldquo;{query.trim()}&rdquo;.
-        </Text>
+        <Text style={styles.noResult}>{fmt(L.noResult, query.trim())}</Text>
       ) : (
         <>
           {visibleWearing.length > 0 ? (
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>SEDANG DIPAKAI</Text>
+              <Text style={styles.sectionLabel}>{L.sectionWearing}</Text>
               {visibleWearing.map((b) => (
                 <LibraryRow
                   key={b.id}
                   perfume={bottlePerfume(b)}
-                  tag="DIPAKAI"
+                  tag={L.tagWearing}
                   tagStyle={styles.tagWearing}
                   tagTextStyle={styles.tagWearingText}
                   remainingMl={b.remainingMl}
                   onPress={() => navigation.navigate('Detail', { perfumeId: b.perfumeId })}
                   onDelete={user ? () => confirmDelete(b) : undefined}
+                  deleteAria={fmt(L.deleteAria, bottlePerfume(b).name)}
                 />
               ))}
             </View>
           ) : null}
           {visibleSealed.length > 0 ? (
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>TERSEGEL</Text>
+              <Text style={styles.sectionLabel}>{L.sectionSealed}</Text>
               {visibleSealed.map((b) => (
                 <LibraryRow
                   key={b.id}
                   perfume={bottlePerfume(b)}
-                  tag="TERSEGEL"
+                  tag={L.tagSealed}
                   tagStyle={styles.tagNeutral}
                   tagTextStyle={styles.tagNeutralText}
                   remainingMl={b.remainingMl}
                   onPress={() => navigation.navigate('Detail', { perfumeId: b.perfumeId })}
                   onDelete={user ? () => confirmDelete(b) : undefined}
+                  deleteAria={fmt(L.deleteAria, bottlePerfume(b).name)}
                 />
               ))}
             </View>
           ) : null}
           {visibleFinished.length > 0 ? (
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>HABIS</Text>
+              <Text style={styles.sectionLabel}>{L.sectionFinished}</Text>
               {visibleFinished.map((b) => (
                 <LibraryRow
                   key={b.id}
                   perfume={bottlePerfume(b)}
-                  tag="HABIS"
+                  tag={L.tagFinished}
                   tagStyle={styles.tagNeutral}
                   tagTextStyle={styles.tagNeutralText}
                   remainingMl={b.remainingMl}
                   onPress={() => navigation.navigate('Detail', { perfumeId: b.perfumeId })}
                   onDelete={user ? () => confirmDelete(b) : undefined}
+                  deleteAria={fmt(L.deleteAria, bottlePerfume(b).name)}
                 />
               ))}
             </View>
           ) : null}
           {visibleWishlist.length > 0 ? (
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>WISHLIST</Text>
+              <Text style={styles.sectionLabel}>{L.sectionWishlist}</Text>
               {visibleWishlist.map((p) => (
                 <LibraryRow
                   key={p.id}
                   perfume={p}
-                  tag="INGIN COBA"
+                  tag={L.tagWishlist}
                   tagStyle={styles.tagNeutral}
                   tagTextStyle={styles.tagNeutralText}
                   onPress={() => navigation.navigate('Detail', { perfumeId: p.id })}
@@ -233,9 +242,9 @@ export default function LibraryScreen() {
         style={styles.addBtn}
         onPress={handleAdd}
         accessibilityRole="button"
-        accessibilityLabel="Tambah botol"
+        accessibilityLabel={L.addButton}
       >
-        <Text style={styles.addBtnText}>Tambah botol</Text>
+        <Text style={styles.addBtnText}>{L.addButton}</Text>
       </PressableScale>
 
       <Pressable
@@ -243,7 +252,7 @@ export default function LibraryScreen() {
         onPress={() => navigation.navigate('Catalog')}
         accessibilityRole="button"
       >
-        <Text style={styles.catalogText}>Jelajahi katalog — 2 parfum terverifikasi →</Text>
+        <Text style={styles.catalogText}>{L.catalogRow}</Text>
       </Pressable>
     </ScrollView>
   );

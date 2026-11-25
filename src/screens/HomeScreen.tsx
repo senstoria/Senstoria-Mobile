@@ -6,14 +6,18 @@
 // Kerangka Fase 2 (demo, tanpa Firebase): hitungan Perpustakaan dan
 // tombol "Catat pemakaian hari ini" memakai store lokal perangkat.
 // "Wewangian hari ini" = parfum dari botol yang sedang dipakai.
+// Copy layar ini memakai i18n (t.mobile.home + t.mobile.common);
+// tanggal mengikuti locale aktif.
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { PressableScale } from '../lib/feel';
 import { useStore } from '../lib/store';
+import { useLocale } from '../i18n/locale';
+import { fmt, formatCurrency, type Locale } from '../i18n';
 import { tokens } from '../theme/tokens';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
-import { PERFUMES, formatPriceIdr, getPerfume } from '../data/catalog';
+import { PERFUMES, getPerfume } from '../data/catalog';
 import { Disc } from '../components/Disc';
 import { NotesRows } from '../components/NotesRows';
 import { Rings } from '../components/Rings';
@@ -22,9 +26,9 @@ import type { AppNavigationProp } from '../navigation/RootNavigator';
 const PERFECTION = getPerfume('hmns-the-perfection');
 const ENCHANTEE = PERFUMES.find((p) => p.id === 'carl-claire-enchantee') as (typeof PERFUMES)[number];
 
-function todayId(): string {
+function todayLabel(locale: Locale): string {
   return new Date()
-    .toLocaleDateString('id-ID', {
+    .toLocaleDateString(locale === 'id' ? 'id-ID' : 'en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -38,6 +42,9 @@ export default function HomeScreen() {
   const fontReady = useDisplayFontReady();
   const { user, activeBottles, currentlyWearing, valuationIdr, todayWearFor, logWear, removeTodayWear, signOut } =
     useStore();
+  const { locale, t } = useLocale();
+  const L = t.mobile.home;
+  const C = t.mobile.common;
 
   // Parfum hero = parfum dari botol yang sedang dipakai; bila belum ada
   // botol, tampilkan The Perfection (parfum demo utama).
@@ -50,25 +57,21 @@ export default function HomeScreen() {
       return;
     }
     if (!currentlyWearing) {
-      Alert.alert(
-        'Belum ada botol',
-        'Tambah dulu botol ke perpustakaanmu supaya pemakaian bisa dicatat.',
-        [
-          { text: 'Batal', style: 'cancel' },
-          { text: 'Tambah botol', onPress: () => navigation.navigate('AddBottle', {}) },
-        ],
-      );
+      Alert.alert(L.alertNoBottleTitle, L.alertNoBottleBody, [
+        { text: C.cancel, style: 'cancel' },
+        { text: C.alertAddBottle, onPress: () => navigation.navigate('AddBottle', {}) },
+      ]);
       return;
     }
     if (loggedToday) {
-      Alert.alert('Sudah tercatat hari ini', `${heroPerfume.name} sudah kamu catat pemakaiannya hari ini.`, [
-        { text: 'Batal', style: 'cancel' },
+      Alert.alert(C.alertLoggedTitle, fmt(C.alertLoggedBody, heroPerfume.name), [
+        { text: C.cancel, style: 'cancel' },
         {
-          text: 'Hapus catatan',
+          text: C.alertDeleteLog,
           style: 'destructive',
           onPress: () => removeTodayWear(currentlyWearing.id),
         },
-        { text: 'Lihat Jurnal', onPress: () => navigation.navigate('Journal') },
+        { text: C.alertViewJournal, onPress: () => navigation.navigate('Journal') },
       ]);
       return;
     }
@@ -80,9 +83,9 @@ export default function HomeScreen() {
       navigation.navigate('Login');
       return;
     }
-    Alert.alert('Akun demo', `Masuk sebagai ${user.email} (mode demo, tersimpan di perangkat ini).`, [
-      { text: 'Batal', style: 'cancel' },
-      { text: 'Keluar', style: 'destructive', onPress: () => signOut() },
+    Alert.alert(L.alertAccountTitle, fmt(L.alertAccountBody, user.email), [
+      { text: C.cancel, style: 'cancel' },
+      { text: L.alertSignOut, style: 'destructive', onPress: () => signOut() },
     ]);
   };
 
@@ -93,13 +96,15 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.topbar}>
-        <Text style={styles.date}>{todayId()}</Text>
+        <Text style={styles.date}>{todayLabel(locale)}</Text>
         <View style={styles.topbarRight}>
           <Pressable
             style={styles.iconBtn}
             onPress={handleAccount}
             accessibilityRole="button"
-            accessibilityLabel={user ? `Akun ${user.email}` : 'Masuk'}
+            accessibilityLabel={
+              user ? fmt(L.accountAriaSignedIn, user.email) : L.accountAriaSignedOut
+            }
           >
             <Ionicons
               name={user ? 'person' : 'person-outline'}
@@ -111,7 +116,7 @@ export default function HomeScreen() {
             style={styles.iconBtn}
             onPress={() => navigation.navigate('Catalog')}
             accessibilityRole="button"
-            accessibilityLabel="Cari di katalog"
+            accessibilityLabel={L.searchAria}
           >
             <Ionicons name="search" size={21} color={tokens.color.ink} />
           </Pressable>
@@ -132,7 +137,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <Text style={styles.eyebrow}>WEWANGIAN HARI INI</Text>
+      <Text style={styles.eyebrow}>{L.eyebrow}</Text>
       <Text
         style={[
           styles.title,
@@ -143,7 +148,7 @@ export default function HomeScreen() {
       </Text>
       <Text style={styles.meta}>
         {heroPerfume.brand} · {heroPerfume.concentration} · {heroPerfume.sizeMl} ml ·{' '}
-        {formatPriceIdr(heroPerfume.priceIdr)}
+        {formatCurrency(heroPerfume.priceIdr, locale)}
       </Text>
 
       <NotesRows notes={heroPerfume.notes} />
@@ -152,10 +157,10 @@ export default function HomeScreen() {
         style={[styles.cta, loggedToday && styles.ctaLogged]}
         onPress={handleLogWear}
         accessibilityRole="button"
-        accessibilityLabel={loggedToday ? 'Tercatat hari ini' : 'Catat pemakaian hari ini'}
+        accessibilityLabel={loggedToday ? C.logWearCtaLogged : C.logWearCta}
       >
         <Text style={[styles.ctaText, loggedToday && styles.ctaTextLogged]}>
-          {loggedToday ? 'Tercatat hari ini' : 'Catat pemakaian hari ini'}
+          {loggedToday ? C.logWearCtaLogged : C.logWearCta}
         </Text>
       </PressableScale>
 
@@ -165,9 +170,9 @@ export default function HomeScreen() {
           onPress={() => navigation.navigate('Library')}
           accessibilityRole="button"
         >
-          <Text style={styles.srowKey}>Perpustakaan</Text>
+          <Text style={styles.srowKey}>{L.libraryRow}</Text>
           <Text style={styles.srowValue}>
-            {activeBottles.length} botol aktif · {formatPriceIdr(valuationIdr)}
+            {fmt(L.libraryValue, activeBottles.length, formatCurrency(valuationIdr, locale))}
           </Text>
         </Pressable>
         <Pressable
@@ -175,20 +180,20 @@ export default function HomeScreen() {
           onPress={() => navigation.navigate('Detail', { perfumeId: ENCHANTEE.id })}
           accessibilityRole="button"
         >
-          <Text style={styles.srowKey}>Jelajahi</Text>
+          <Text style={styles.srowKey}>{L.exploreRow}</Text>
           <Text style={styles.srowValue}>
             {ENCHANTEE.name} · {ENCHANTEE.concentration} {ENCHANTEE.sizeMl} ml ·{' '}
-            {formatPriceIdr(ENCHANTEE.priceIdr)}
+            {formatCurrency(ENCHANTEE.priceIdr, locale)}
           </Text>
         </Pressable>
       </View>
 
       <Pressable onPress={() => navigation.navigate('Finder')} accessibilityRole="button">
-        <Text style={styles.finder}>Cari wewangian yang cocok →</Text>
+        <Text style={styles.finder}>{L.finderLink}</Text>
       </Pressable>
       {!user ? (
         <Pressable onPress={() => navigation.navigate('Login')} accessibilityRole="button">
-          <Text style={styles.loginHint}>Masuk untuk menyimpan perpustakaanmu →</Text>
+          <Text style={styles.loginHint}>{L.loginHint}</Text>
         </Pressable>
       ) : null}
     </ScrollView>

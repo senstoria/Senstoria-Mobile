@@ -2,6 +2,7 @@
 // Cerita TERTULIS tersimpan di store lokal perangkat. Hanya cerita
 // tertulis yang dihitung sebagai Journal stories (aturan PRD) — wear
 // log tidak dihitung sebagai cerita.
+// Copy layar ini memakai i18n (t.mobile.story).
 import { useState } from 'react';
 import {
   Pressable,
@@ -15,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { PressableScale } from '../lib/feel';
 import { useStore } from '../lib/store';
+import { useLocale } from '../i18n/locale';
 import { tokens } from '../theme/tokens';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
 import { getPerfume } from '../data/catalog';
@@ -25,6 +27,9 @@ export default function StoryComposerScreen() {
   const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
   const { user, bottles, addStory } = useStore();
+  const { t } = useLocale();
+  const L = t.mobile.story;
+  const C = t.mobile.common;
 
   // Parfum yang bisa diceritakan = parfum dari botol yang dimiliki.
   const ownedPerfumeIds = Array.from(new Set(bottles.map((b) => b.perfumeId)));
@@ -35,11 +40,11 @@ export default function StoryComposerScreen() {
 
   const save = () => {
     if (body.trim().length < 3) {
-      setError('Tulis dulu ceritanya — minimal beberapa kata.');
+      setError(L.errorTooShort);
       return;
     }
     if (!perfumeId) {
-      setError('Pilih dulu parfumnya.');
+      setError(L.errorNoPerfume);
       return;
     }
     setError('');
@@ -51,22 +56,19 @@ export default function StoryComposerScreen() {
     return (
       <View style={styles.gate}>
         <Text style={[styles.gateTitle, { fontFamily: displayFontFamily(fontReady) }]}>
-          Masuk dulu.
+          {L.gateLoginTitle}
         </Text>
-        <Text style={styles.gateBody}>
-          Cerita aroma tersimpan di akun demo perangkat ini. Masuk dulu supaya
-          ceritamu tersimpan.
-        </Text>
+        <Text style={styles.gateBody}>{L.gateLoginBody}</Text>
         <PressableScale
           style={styles.cta}
           onPress={() => navigation.navigate('Login')}
           accessibilityRole="button"
-          accessibilityLabel="Masuk"
+          accessibilityLabel={t.mobile.login.submitLogin}
         >
-          <Text style={styles.ctaText}>Masuk</Text>
+          <Text style={styles.ctaText}>{t.mobile.login.submitLogin}</Text>
         </PressableScale>
         <Pressable onPress={() => navigation.goBack()} accessibilityRole="button">
-          <Text style={styles.link}>Batal</Text>
+          <Text style={styles.link}>{C.cancel}</Text>
         </Pressable>
       </View>
     );
@@ -76,22 +78,19 @@ export default function StoryComposerScreen() {
     return (
       <View style={styles.gate}>
         <Text style={[styles.gateTitle, { fontFamily: displayFontFamily(fontReady) }]}>
-          Belum ada botol.
+          {L.gateNoBottleTitle}
         </Text>
-        <Text style={styles.gateBody}>
-          Cerita aroma ditulis untuk parfum yang kamu miliki. Tambah dulu
-          botol pertamamu.
-        </Text>
+        <Text style={styles.gateBody}>{L.gateNoBottleBody}</Text>
         <PressableScale
           style={styles.cta}
           onPress={() => navigation.navigate('AddBottle', {})}
           accessibilityRole="button"
-          accessibilityLabel="Tambah botol"
+          accessibilityLabel={L.gateNoBottleCta}
         >
-          <Text style={styles.ctaText}>Tambah botol</Text>
+          <Text style={styles.ctaText}>{L.gateNoBottleCta}</Text>
         </PressableScale>
         <Pressable onPress={() => navigation.goBack()} accessibilityRole="button">
-          <Text style={styles.link}>Batal</Text>
+          <Text style={styles.link}>{C.cancel}</Text>
         </Pressable>
       </View>
     );
@@ -109,22 +108,20 @@ export default function StoryComposerScreen() {
           style={styles.iconBtn}
           onPress={() => navigation.goBack()}
           accessibilityRole="button"
-          accessibilityLabel="Kembali"
+          accessibilityLabel={C.backAria}
         >
           <Ionicons name="chevron-back" size={24} color={tokens.color.ink} />
         </Pressable>
-        <Text style={styles.topbarTitle}>Tulis cerita</Text>
+        <Text style={styles.topbarTitle}>{L.topbarTitle}</Text>
         <View style={styles.iconBtnSpacer} />
       </View>
 
       <Text style={[styles.title, { fontFamily: displayFontFamily(fontReady) }]}>
-        Cerita aroma.
+        {L.title}
       </Text>
-      <Text style={styles.subtitle}>
-        Momen apa yang parfum ini ingatkan padamu?
-      </Text>
+      <Text style={styles.subtitle}>{L.subtitle}</Text>
 
-      <Text style={styles.label}>PARFUM</Text>
+      <Text style={styles.label}>{L.perfumeLabel}</Text>
       <View style={styles.chipRow}>
         {ownedPerfumeIds.map((id) => {
           const p = getPerfume(id);
@@ -145,20 +142,20 @@ export default function StoryComposerScreen() {
         })}
       </View>
 
-      <Text style={styles.label}>JUDUL (OPSIONAL)</Text>
+      <Text style={styles.label}>{L.titleLabel}</Text>
       <TextInput
         style={styles.input}
-        placeholder="Mis. Pagi pertama di kantor baru"
+        placeholder={L.titlePlaceholder}
         placeholderTextColor={tokens.color.ink3}
         value={title}
         onChangeText={setTitle}
         returnKeyType="next"
       />
 
-      <Text style={styles.label}>CERITA</Text>
+      <Text style={styles.label}>{L.bodyLabel}</Text>
       <TextInput
         style={[styles.input, styles.bodyInput]}
-        placeholder="Tulis ceritanya di sini…"
+        placeholder={L.bodyPlaceholder}
         placeholderTextColor={tokens.color.ink3}
         value={body}
         onChangeText={(v) => {
@@ -175,13 +172,11 @@ export default function StoryComposerScreen() {
         style={styles.cta}
         onPress={save}
         accessibilityRole="button"
-        accessibilityLabel="Simpan cerita"
+        accessibilityLabel={L.saveButton}
       >
-        <Text style={styles.ctaText}>Simpan cerita</Text>
+        <Text style={styles.ctaText}>{L.saveButton}</Text>
       </PressableScale>
-      <Text style={styles.note}>
-        Cerita tersimpan hanya di perangkat ini (mode demo).
-      </Text>
+      <Text style={styles.note}>{L.note}</Text>
     </ScrollView>
   );
 }

@@ -13,23 +13,26 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PressableScale } from '../lib/feel';
+import { useLocale } from '../i18n/locale';
 import { tokens } from '../theme/tokens';
 import type { TabParamList } from '../navigation/RootNavigator';
 
 const TABS: {
   name: keyof TabParamList;
-  label: string;
+  labelKey: 'home' | 'library' | 'journal' | 'catalog';
   icon: keyof typeof Ionicons.glyphMap;
   iconOutline: keyof typeof Ionicons.glyphMap;
 }[] = [
-  { name: 'Home', label: 'Beranda', icon: 'home', iconOutline: 'home-outline' },
-  { name: 'Library', label: 'Perpustakaan', icon: 'library', iconOutline: 'library-outline' },
-  { name: 'Journal', label: 'Jurnal', icon: 'create', iconOutline: 'create-outline' },
-  { name: 'Catalog', label: 'Katalog', icon: 'grid', iconOutline: 'grid-outline' },
+  { name: 'Home', labelKey: 'home', icon: 'home', iconOutline: 'home-outline' },
+  { name: 'Library', labelKey: 'library', icon: 'library', iconOutline: 'library-outline' },
+  { name: 'Journal', labelKey: 'journal', icon: 'create', iconOutline: 'create-outline' },
+  { name: 'Catalog', labelKey: 'catalog', icon: 'grid', iconOutline: 'grid-outline' },
 ];
 
 export default function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const { t } = useLocale();
+  const tabLabels = t.mobile.tabs;
   return (
     <View
       style={[
@@ -40,6 +43,7 @@ export default function FloatingTabBar({ state, navigation }: BottomTabBarProps)
       {state.routes.map((route, index) => {
         const focused = state.index === index;
         const tab = TABS.find((t) => t.name === route.name) ?? TABS[0];
+        const label = tabLabels[tab.labelKey];
         const onPress = () => {
           const event = navigation.emit({
             type: 'tabPress',
@@ -58,7 +62,7 @@ export default function FloatingTabBar({ state, navigation }: BottomTabBarProps)
             onPress={onPress}
             accessibilityRole="button"
             accessibilityState={{ selected: focused }}
-            accessibilityLabel={tab.label}
+            accessibilityLabel={label}
           >
             <View style={[styles.tabInner, focused && styles.tabInnerFocused]}>
               <Ionicons
@@ -66,7 +70,7 @@ export default function FloatingTabBar({ state, navigation }: BottomTabBarProps)
                 size={23}
                 color={color}
               />
-              <Text style={[styles.tabLabel, { color }]}>{tab.label}</Text>
+              <Text style={[styles.tabLabel, { color }]}>{label}</Text>
             </View>
           </PressableScale>
         );

@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { setFeelTone } from './src/lib/feel';
 import { StoreProvider } from './src/lib/store';
+import { LocaleProvider } from './src/i18n/locale';
 import { DisplayFontReadyProvider } from './src/theme/fonts';
 import { tokens } from './src/theme/tokens';
 import RootNavigator from './src/navigation/RootNavigator';
@@ -57,11 +58,13 @@ export default function App() {
       >
         <DisplayFontReadyProvider value={fontReady}>
           <StatusBar style="dark" />
-          <StoreProvider>
-            <NavigationContainer>
-              <RootNavigator />
-            </NavigationContainer>
-          </StoreProvider>
+          <LocaleProvider>
+            <StoreProvider>
+              <NavigationContainer>
+                <RootNavigator />
+              </NavigationContainer>
+            </StoreProvider>
+          </LocaleProvider>
         </DisplayFontReadyProvider>
       </GestureHandlerRootView>
     );

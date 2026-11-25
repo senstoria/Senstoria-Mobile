@@ -3,10 +3,14 @@
 // dibaca dari store lokal perangkat. Angka nol ditampilkan apa adanya
 // (bukan disembunyikan, bukan diisi contoh). Hanya cerita TERTULIS yang
 // dihitung sebagai cerita (wear log terpisah — aturan PRD).
+// Copy layar ini memakai i18n (t.mobile.journal); tanggal memakai
+// formatDateId(..., locale).
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { PressableScale } from '../lib/feel';
 import { formatDateId, useStore } from '../lib/store';
+import { useLocale } from '../i18n/locale';
+import { fmt } from '../i18n';
 import { tokens } from '../theme/tokens';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
 import { getPerfume } from '../data/catalog';
@@ -16,6 +20,8 @@ export default function JournalScreen() {
   const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
   const { user, bottles, wearLogs, stories, activeBottles, currentlyWearing } = useStore();
+  const { locale, t } = useLocale();
+  const L = t.mobile.journal;
 
   const wearingPerfume = currentlyWearing
     ? getPerfume(currentlyWearing.perfumeId)
@@ -41,9 +47,9 @@ export default function JournalScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Text style={[styles.title, { fontFamily: displayFontFamily(fontReady) }]}>
-        Buku Harian
+        {L.title}
       </Text>
-      <Text style={styles.subtitle}>Catatan pemakaian &amp; cerita aroma.</Text>
+      <Text style={styles.subtitle}>{L.subtitle}</Text>
 
       {!user ? (
         <Pressable
@@ -51,52 +57,50 @@ export default function JournalScreen() {
           onPress={() => navigation.navigate('Login')}
           accessibilityRole="button"
         >
-          <Text style={styles.loginBannerText}>
-            Masuk untuk mencatat pemakaian dan menulis cerita (mode demo) →
-          </Text>
+          <Text style={styles.loginBannerText}>{L.loginBanner}</Text>
         </Pressable>
       ) : null}
 
       <View style={styles.stats}>
         <View style={styles.stat}>
           <Text style={styles.statNum}>{wearLogs.length}</Text>
-          <Text style={styles.statLabel}>pemakaian</Text>
+          <Text style={styles.statLabel}>{L.statWears}</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.stat}>
           <Text style={styles.statNum}>{stories.length}</Text>
-          <Text style={styles.statLabel}>cerita</Text>
+          <Text style={styles.statLabel}>{L.statStories}</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.stat}>
           <Text style={styles.statNum}>{activeBottles.length}</Text>
-          <Text style={styles.statLabel}>botol aktif</Text>
+          <Text style={styles.statLabel}>{L.statBottles}</Text>
         </View>
       </View>
 
       <View style={styles.quickLog}>
-        <Text style={styles.quickLogTitle}>Catat pemakaian hari ini</Text>
+        <Text style={styles.quickLogTitle}>{L.quickLogTitle}</Text>
         {wearingPerfume ? (
           <Text style={styles.quickLogSub}>
             {wearingPerfume.name} · {wearingPerfume.brand}
           </Text>
         ) : (
-          <Text style={styles.quickLogSub}>Belum ada botol di perpustakaanmu.</Text>
+          <Text style={styles.quickLogSub}>{L.quickLogEmpty}</Text>
         )}
         <PressableScale
           style={styles.quickLogCta}
           onPress={() => navigation.navigate('Home')}
           accessibilityRole="button"
-          accessibilityLabel="Buka Beranda untuk mencatat"
+          accessibilityLabel={L.quickLogCtaAria}
         >
-          <Text style={styles.quickLogCtaText}>Buka Beranda untuk mencatat →</Text>
+          <Text style={styles.quickLogCtaText}>{L.quickLogCta}</Text>
         </PressableScale>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>RIWAYAT PEMAKAIAN</Text>
+        <Text style={styles.sectionLabel}>{L.sectionWears}</Text>
         {sortedLogs.length === 0 ? (
-          <Text style={styles.empty}>Belum ada catatan pemakaian.</Text>
+          <Text style={styles.empty}>{L.emptyWears}</Text>
         ) : (
           sortedLogs.map((log) => {
             const p = getPerfume(log.perfumeId);
@@ -104,9 +108,9 @@ export default function JournalScreen() {
               <View key={log.id} style={styles.logRow}>
                 <View style={styles.logText}>
                   <Text style={styles.logName}>{p.name}</Text>
-                  <Text style={styles.logMeta}>{formatDateId(log.wornAt)}</Text>
+                  <Text style={styles.logMeta}>{formatDateId(log.wornAt, locale)}</Text>
                 </View>
-                <Text style={styles.logSprays}>{log.sprays}× semprot</Text>
+                <Text style={styles.logSprays}>{fmt(L.sprays, log.sprays)}</Text>
               </View>
             );
           })
@@ -114,19 +118,19 @@ export default function JournalScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>CERITA AROMA</Text>
+        <Text style={styles.sectionLabel}>{L.sectionStories}</Text>
         {sortedStories.length === 0 ? (
-          <Text style={styles.empty}>Belum ada cerita aroma.</Text>
+          <Text style={styles.empty}>{L.emptyStories}</Text>
         ) : (
           sortedStories.map((story) => {
             const p = getPerfume(story.perfumeId);
             return (
               <View key={story.id} style={styles.storyCard}>
                 <Text style={styles.storyTitle}>
-                  {story.title !== '' ? story.title : 'Cerita tanpa judul'}
+                  {story.title !== '' ? story.title : L.untitledStory}
                 </Text>
                 <Text style={styles.storyMeta}>
-                  {p.name} · {formatDateId(story.storyDate)}
+                  {p.name} · {formatDateId(story.storyDate, locale)}
                 </Text>
                 <Text style={styles.storyBody} numberOfLines={3}>
                   {story.body}
@@ -139,15 +143,15 @@ export default function JournalScreen() {
           style={styles.writeBtn}
           onPress={handleWriteStory}
           accessibilityRole="button"
-          accessibilityLabel="Tulis cerita aroma"
+          accessibilityLabel={L.writeButton}
         >
-          <Text style={styles.writeBtnText}>Tulis cerita aroma</Text>
+          <Text style={styles.writeBtnText}>{L.writeButton}</Text>
         </PressableScale>
         <Pressable
           onPress={() => navigation.navigate('Catalog')}
           accessibilityRole="button"
         >
-          <Text style={styles.link}>Jelajahi katalog →</Text>
+          <Text style={styles.link}>{L.catalogLink}</Text>
         </Pressable>
       </View>
     </ScrollView>

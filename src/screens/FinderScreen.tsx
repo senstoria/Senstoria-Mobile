@@ -3,6 +3,9 @@
 // batas 96, batas konflik 79) terhadap KATALOG DEMO (2 parfum).
 // Bukan AI/ML — pencocokan rasa yang bisa dijelaskan. Jawaban kuis
 // tidak disimpan ke server (mode demo, tanpa Firebase).
+// Copy memakai i18n: label opsi kuis dari t.finderQuiz.steps (id opsi
+// sama persis dengan nilai jawaban), hasil dari field bilingual
+// scoring (…Id/…En), sisanya dari t.mobile.finder.
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -14,66 +17,25 @@ import {
   type ScentQuizAnswers,
 } from '../lib/finder/scoring';
 import { DEMO_SEED_PERFUMES } from '../lib/finder/demoCatalog';
+import { useLocale } from '../i18n/locale';
+import { formatCurrency, type Translations } from '../i18n';
 import { tokens } from '../theme/tokens';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
-import { formatPriceIdr, getPerfume } from '../data/catalog';
+import { getPerfume } from '../data/catalog';
 import { Disc } from '../components/Disc';
 import type { AppNavigationProp } from '../navigation/RootNavigator';
 
 type Option = { value: string; label: string };
 
-const FAMILIES: Option[] = [
-  { value: 'Woody', label: 'Woody' },
-  { value: 'Fresh', label: 'Segar' },
-  { value: 'Floral', label: 'Floral' },
-  { value: 'Gourmand', label: 'Gourmand' },
-  { value: 'Ambery', label: 'Ambery' },
-  { value: 'Aromatic', label: 'Aromatik' },
-  { value: 'not_sure', label: 'Belum tahu' },
-];
-
-const CLIMATES: Option[] = [
-  { value: 'outdoor_hot', label: 'Panas terik luar ruangan' },
-  { value: 'indoor_ac', label: 'Ruangan ber-AC' },
-  { value: 'evening_cool', label: 'Malam sejuk' },
-  { value: 'flexible', label: 'Fleksibel' },
-];
-
-const OCCASIONS: Option[] = [
-  { value: 'daily_office', label: 'Sehari-hari / kantor' },
-  { value: 'casual_dating', label: 'Santai / kencan' },
-  { value: 'formal_evening', label: 'Formal / malam' },
-  { value: 'outdoor_sport', label: 'Olahraga luar ruangan' },
-  { value: 'flexible', label: 'Fleksibel' },
-];
-
-const LONGEVITIES: Option[] = [
-  { value: 'light', label: 'Ringan' },
-  { value: 'moderate', label: 'Sedang' },
-  { value: 'long', label: 'Tahan lama' },
-  { value: 'not_sure', label: 'Belum tahu' },
-];
-
-const GENDERS: Option[] = [
-  { value: 'feminine', label: 'Feminin' },
-  { value: 'masculine', label: 'Maskulin' },
-  { value: 'unisex', label: 'Unisex' },
-  { value: 'any', label: 'Bebas' },
-];
-
-const BUDGETS: Option[] = [
-  { value: 'budget', label: 'Hemat (< Rp 250rb)' },
-  { value: 'mid', label: 'Menengah (Rp 250–600rb)' },
-  { value: 'premium', label: 'Premium (> Rp 600rb)' },
-  { value: 'flexible', label: 'Fleksibel' },
-];
-
-const AVOIDS: Option[] = [
-  { value: 'none', label: 'Tidak ada' },
-  { value: 'overly_sweet', label: 'Terlalu manis' },
-  { value: 'heavy_smoke_oud', label: 'Oud / dupa berat' },
-  { value: 'sharp_white_floral', label: 'Floral putih tajam' },
-];
+/** Label opsi kuis dari t.finderQuiz.steps, urutan tetap seperti layar
+ *  mobile (id opsi sama persis dengan nilai jawaban scoring). */
+function quizOptions(t: Translations, step: number, ids: string[]): Option[] {
+  const stepData = t.finderQuiz.steps[step];
+  return ids.map((id) => {
+    const found = stepData?.options.find((o) => o.id === id);
+    return { value: id, label: found?.label ?? id };
+  });
+}
 
 function Section({
   title,
@@ -114,8 +76,38 @@ function Section({
 export default function FinderScreen() {
   const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
+  const { locale, t } = useLocale();
+  const L = t.mobile.finder;
+  const C = t.mobile.common;
   const [answers, setAnswers] = useState<ScentQuizAnswers>(DEFAULT_QUIZ_ANSWERS);
   const [showResults, setShowResults] = useState(false);
+
+  const FAMILIES = quizOptions(t, 0, [
+    'Woody',
+    'Fresh',
+    'Floral',
+    'Gourmand',
+    'Ambery',
+    'Aromatic',
+    'not_sure',
+  ]);
+  const CLIMATES = quizOptions(t, 1, ['outdoor_hot', 'indoor_ac', 'evening_cool', 'flexible']);
+  const OCCASIONS = quizOptions(t, 2, [
+    'daily_office',
+    'casual_dating',
+    'formal_evening',
+    'outdoor_sport',
+    'flexible',
+  ]);
+  const LONGEVITIES = quizOptions(t, 3, ['light', 'moderate', 'long', 'not_sure']);
+  const GENDERS = quizOptions(t, 4, ['feminine', 'masculine', 'unisex', 'any']);
+  const BUDGETS = quizOptions(t, 5, ['budget', 'mid', 'premium', 'flexible']);
+  const AVOIDS = quizOptions(t, 6, [
+    'none',
+    'overly_sweet',
+    'heavy_smoke_oud',
+    'sharp_white_floral',
+  ]);
 
   const results = useMemo(
     () => (showResults ? rankRecommendations(DEMO_SEED_PERFUMES, answers) : []),
@@ -161,24 +153,23 @@ export default function FinderScreen() {
             style={styles.iconBtn}
             onPress={() => navigation.goBack()}
             accessibilityRole="button"
-            accessibilityLabel="Kembali"
+            accessibilityLabel={C.backAria}
           >
             <Ionicons name="chevron-back" size={24} color={tokens.color.ink} />
           </Pressable>
-          <Text style={styles.topbarTitle}>Hasil pencocokan</Text>
+          <Text style={styles.topbarTitle}>{L.resultsTopbar}</Text>
           <View style={styles.iconBtnSpacer} />
         </View>
 
         <Text style={[styles.title, { fontFamily: displayFontFamily(fontReady) }]}>
-          Yang paling{'\n'}cocok untukmu.
+          {L.resultsTitle}
         </Text>
-        <Text style={styles.subtitle}>
-          Skor dihitung dari katalog demo (2 parfum) — pencocokan rasa yang
-          bisa dijelaskan, bukan AI.
-        </Text>
+        <Text style={styles.subtitle}>{L.resultsSubtitle}</Text>
 
         {results.map((r) => {
           const p = getPerfume(r.perfume.id);
+          const whyFits = locale === 'id' ? r.whyFitsBulletsId : r.whyFitsBulletsEn;
+          const mismatch = locale === 'id' ? r.possibleMismatchId : r.possibleMismatchEn;
           return (
             <Pressable
               key={r.perfume.id}
@@ -191,26 +182,31 @@ export default function FinderScreen() {
                 <View style={styles.resultHeadText}>
                   <Text style={styles.resultName}>{p.name}</Text>
                   <Text style={styles.resultMeta}>
-                    {p.brand} · {formatPriceIdr(p.priceIdr)}
+                    {p.brand} · {formatCurrency(p.priceIdr, locale)}
                   </Text>
                 </View>
                 <View style={styles.score}>
                   <Text style={styles.scoreNum}>{r.matchScore}%</Text>
-                  <Text style={styles.scoreLabel}>cocok</Text>
+                  <Text style={styles.scoreLabel}>{L.scoreLabel}</Text>
                 </View>
               </View>
-              {r.whyFitsBulletsId.map((b) => (
+              {whyFits.map((b) => (
                 <Text key={b} style={styles.why}>
                   • {b}
                 </Text>
               ))}
-              <Text style={styles.mismatch}>Yang mungkin kurang cocok: {r.possibleMismatchId}</Text>
+              <Text style={styles.mismatch}>
+                {L.mismatchPrefix}
+                {mismatch}
+              </Text>
               <View style={styles.breakdown}>
                 {r.breakdownRows
                   .filter((row) => !row.isNoData)
                   .map((row) => (
                     <View key={row.key} style={styles.breakdownRow}>
-                      <Text style={styles.breakdownLabel}>{row.labelId}</Text>
+                      <Text style={styles.breakdownLabel}>
+                        {locale === 'id' ? row.labelId : row.labelEn}
+                      </Text>
                       <Text style={styles.breakdownPoints}>
                         {row.points}/{row.maxPoints}
                       </Text>
@@ -218,7 +214,9 @@ export default function FinderScreen() {
                   ))}
               </View>
               {r.adjustment ? (
-                <Text style={styles.adjustment}>{r.adjustment.reasonId}</Text>
+                <Text style={styles.adjustment}>
+                  {locale === 'id' ? r.adjustment.reasonId : r.adjustment.reasonEn}
+                </Text>
               ) : null}
             </Pressable>
           );
@@ -228,9 +226,9 @@ export default function FinderScreen() {
           style={styles.secondaryBtn}
           onPress={resetQuiz}
           accessibilityRole="button"
-          accessibilityLabel="Ulangi kuis"
+          accessibilityLabel={L.retryButton}
         >
-          <Text style={styles.secondaryBtnText}>Ulangi kuis</Text>
+          <Text style={styles.secondaryBtnText}>{L.retryButton}</Text>
         </PressableScale>
       </ScrollView>
     );
@@ -247,60 +245,57 @@ export default function FinderScreen() {
           style={styles.iconBtn}
           onPress={() => navigation.goBack()}
           accessibilityRole="button"
-          accessibilityLabel="Kembali"
+          accessibilityLabel={C.backAria}
         >
           <Ionicons name="chevron-back" size={24} color={tokens.color.ink} />
         </Pressable>
-        <Text style={styles.topbarTitle}>Scent Finder</Text>
+        <Text style={styles.topbarTitle}>{L.topbarTitle}</Text>
         <View style={styles.iconBtnSpacer} />
       </View>
 
       <Text style={[styles.title, { fontFamily: displayFontFamily(fontReady) }]}>
-        Cari yang{'\n'}cocok denganmu.
+        {L.quizTitle}
       </Text>
-      <Text style={styles.subtitle}>
-        Jawab 7 pertanyaan singkat. Skor dihitung dari selera — 6 dimensi
-        berbobot, bukan dari popularitas.
-      </Text>
+      <Text style={styles.subtitle}>{L.quizSubtitle}</Text>
 
       <Section
-        title="KELUARGA AROMA YANG KAMU SUKA"
+        title={L.sectionFamily}
         options={FAMILIES}
         selected={answers.preferredFamilies}
         onSelect={(v) => toggleMulti('preferredFamilies', v, 'not_sure')}
       />
       <Section
-        title="BIASANYA DIPAKAI DI MANA"
+        title={L.sectionClimate}
         options={CLIMATES}
         selected={[answers.climateSetting]}
         onSelect={(v) => setSingle('climateSetting', v)}
       />
       <Section
-        title="UNTUK MOMEN APA"
+        title={L.sectionOccasion}
         options={OCCASIONS}
         selected={[answers.occasionSetting]}
         onSelect={(v) => setSingle('occasionSetting', v)}
       />
       <Section
-        title="KETAHANAN YANG DIHARAPKAN"
+        title={L.sectionLongevity}
         options={LONGEVITIES}
         selected={[answers.longevityExpectation]}
         onSelect={(v) => setSingle('longevityExpectation', v)}
       />
       <Section
-        title="PREFERENSI GENDER"
+        title={L.sectionGender}
         options={GENDERS}
         selected={[answers.genderPreference]}
         onSelect={(v) => setSingle('genderPreference', v)}
       />
       <Section
-        title="ANGGARAN"
+        title={L.sectionBudget}
         options={BUDGETS}
         selected={[answers.budgetTier]}
         onSelect={(v) => setSingle('budgetTier', v)}
       />
       <Section
-        title="YANG INGIN DIHINDARI"
+        title={L.sectionAvoid}
         options={AVOIDS}
         selected={answers.avoidNotesOrTraits}
         onSelect={(v) => toggleMulti('avoidNotesOrTraits', v, 'none')}
@@ -310,14 +305,11 @@ export default function FinderScreen() {
         style={styles.cta}
         onPress={() => setShowResults(true)}
         accessibilityRole="button"
-        accessibilityLabel="Lihat hasil"
+        accessibilityLabel={L.cta}
       >
-        <Text style={styles.ctaText}>Lihat hasil</Text>
+        <Text style={styles.ctaText}>{L.cta}</Text>
       </PressableScale>
-      <Text style={styles.note}>
-        Katalog demo berisi 2 parfum terverifikasi. Jawaban tidak disimpan ke
-        mana pun.
-      </Text>
+      <Text style={styles.note}>{L.note}</Text>
     </ScrollView>
   );
 }

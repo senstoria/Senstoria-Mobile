@@ -4,6 +4,8 @@
 // memvalidasi format, lalu sesi demo disimpan lokal (AsyncStorage via
 // store) — akun TIDAK dibuat di server mana pun. Tombol "Masuk sebagai
 // demo" adalah jalan pintas satu ketukan ke sesi demo yang sama.
+// Copy layar ini memakai i18n (t.mobile.login); toggle bahasa ID/EN
+// ada di bawah catatan demo dan tersimpan di perangkat.
 import { useState } from 'react';
 import {
   Pressable,
@@ -17,6 +19,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { PressableScale } from '../lib/feel';
 import { useStore } from '../lib/store';
+import { useLocale } from '../i18n/locale';
 import { tokens } from '../theme/tokens';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
 
@@ -28,6 +31,8 @@ export default function LoginScreen() {
   const navigation = useNavigation();
   const fontReady = useDisplayFontReady();
   const { signInDemo } = useStore();
+  const { locale, setLocale, t } = useLocale();
+  const L = t.mobile.login;
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,15 +41,15 @@ export default function LoginScreen() {
 
   const submit = () => {
     if (!isEmail(email)) {
-      setError('Masukkan alamat email yang valid.');
+      setError(L.errorInvalidEmail);
       return;
     }
     if (password.length < 6) {
-      setError('Kata sandi minimal 6 karakter.');
+      setError(L.errorShortPassword);
       return;
     }
     if (mode === 'register' && password !== confirm) {
-      setError('Konfirmasi kata sandi tidak sama.');
+      setError(L.errorMismatch);
       return;
     }
     setError('');
@@ -70,24 +75,22 @@ export default function LoginScreen() {
         style={styles.backBtn}
         onPress={() => navigation.goBack()}
         accessibilityRole="button"
-        accessibilityLabel="Kembali"
+        accessibilityLabel={t.mobile.common.backAria}
       >
         <Ionicons name="chevron-back" size={24} color={tokens.color.ink} />
       </Pressable>
 
       <Text style={[styles.title, { fontFamily: displayFontFamily(fontReady) }]}>
-        {mode === 'login' ? 'Selamat\n datang.' : 'Buat akun.'}
+        {mode === 'login' ? L.titleLogin : L.titleRegister}
       </Text>
       <Text style={styles.subtitle}>
-        {mode === 'login'
-          ? 'Masuk untuk menyimpan perpustakaan dan jurnalmu di perangkat ini.'
-          : 'Satu akun demo untuk perpustakaan dan jurnalmu di perangkat ini.'}
+        {mode === 'login' ? L.subtitleLogin : L.subtitleRegister}
       </Text>
 
-      <Text style={styles.label}>EMAIL</Text>
+      <Text style={styles.label}>{L.emailLabel}</Text>
       <TextInput
         style={styles.input}
-        placeholder="nama@email.com"
+        placeholder={L.emailPlaceholder}
         placeholderTextColor={tokens.color.ink3}
         value={email}
         onChangeText={(v) => {
@@ -100,10 +103,10 @@ export default function LoginScreen() {
         returnKeyType="next"
       />
 
-      <Text style={styles.label}>KATA SANDI</Text>
+      <Text style={styles.label}>{L.passwordLabel}</Text>
       <TextInput
         style={styles.input}
-        placeholder="Minimal 6 karakter"
+        placeholder={L.passwordPlaceholder}
         placeholderTextColor={tokens.color.ink3}
         value={password}
         onChangeText={(v) => {
@@ -117,10 +120,10 @@ export default function LoginScreen() {
 
       {mode === 'register' ? (
         <>
-          <Text style={styles.label}>ULANGI KATA SANDI</Text>
+          <Text style={styles.label}>{L.confirmLabel}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ketik ulang kata sandi"
+            placeholder={L.confirmPlaceholder}
             placeholderTextColor={tokens.color.ink3}
             value={confirm}
             onChangeText={(v) => {
@@ -140,9 +143,9 @@ export default function LoginScreen() {
         style={styles.cta}
         onPress={submit}
         accessibilityRole="button"
-        accessibilityLabel={mode === 'login' ? 'Masuk' : 'Buat akun'}
+        accessibilityLabel={mode === 'login' ? L.submitLogin : L.submitRegister}
       >
-        <Text style={styles.ctaText}>{mode === 'login' ? 'Masuk' : 'Buat akun'}</Text>
+        <Text style={styles.ctaText}>{mode === 'login' ? L.submitLogin : L.submitRegister}</Text>
       </PressableScale>
 
       <Pressable
@@ -153,13 +156,13 @@ export default function LoginScreen() {
         accessibilityRole="button"
       >
         <Text style={styles.switch}>
-          {mode === 'login' ? 'Belum punya akun? Daftar' : 'Sudah punya akun? Masuk'}
+          {mode === 'login' ? L.switchToRegister : L.switchToLogin}
         </Text>
       </Pressable>
 
       <View style={styles.divider}>
         <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>atau</Text>
+        <Text style={styles.dividerText}>{L.dividerOr}</Text>
         <View style={styles.dividerLine} />
       </View>
 
@@ -167,15 +170,40 @@ export default function LoginScreen() {
         style={styles.demoBtn}
         onPress={enterAsDemo}
         accessibilityRole="button"
-        accessibilityLabel="Masuk sebagai demo"
+        accessibilityLabel={L.demoButton}
       >
-        <Text style={styles.demoBtnText}>Masuk sebagai demo</Text>
+        <Text style={styles.demoBtnText}>{L.demoButton}</Text>
       </PressableScale>
 
-      <Text style={styles.note}>
-        Mode demo — akun dan data tersimpan hanya di perangkat ini. Belum ada
-        server; masuk dengan akun sungguhan hadir setelah Firebase diaktifkan.
-      </Text>
+      <Text style={styles.note}>{L.demoNote}</Text>
+
+      <View style={styles.langRow}>
+        <Text style={styles.langLabel}>{t.mobile.language.label}</Text>
+        <View style={styles.langPills}>
+          <Pressable
+            style={[styles.langPill, locale === 'id' && styles.langPillActive]}
+            onPress={() => setLocale('id')}
+            accessibilityRole="button"
+            accessibilityState={{ selected: locale === 'id' }}
+            accessibilityLabel={t.mobile.language.aria}
+          >
+            <Text style={[styles.langPillText, locale === 'id' && styles.langPillTextActive]}>
+              ID
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.langPill, locale === 'en' && styles.langPillActive]}
+            onPress={() => setLocale('en')}
+            accessibilityRole="button"
+            accessibilityState={{ selected: locale === 'en' }}
+            accessibilityLabel={t.mobile.language.aria}
+          >
+            <Text style={[styles.langPillText, locale === 'en' && styles.langPillTextActive]}>
+              EN
+            </Text>
+          </Pressable>
+        </View>
+      </View>
     </ScrollView>
   );
 }
@@ -269,4 +297,30 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
+  langRow: {
+    marginTop: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  langLabel: {
+    fontSize: tokens.type.meta,
+    fontWeight: '600',
+    color: tokens.color.ink2,
+  },
+  langPills: { flexDirection: 'row', gap: 8 },
+  langPill: {
+    height: 44,
+    minWidth: 56,
+    paddingHorizontal: 18,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: tokens.color.rule,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  langPillActive: { backgroundColor: tokens.color.accent, borderColor: tokens.color.accent },
+  langPillText: { fontSize: tokens.type.meta, fontWeight: '700', color: tokens.color.ink },
+  langPillTextActive: { color: tokens.color.onAccent },
 });

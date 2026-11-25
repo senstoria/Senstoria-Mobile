@@ -1,8 +1,9 @@
 // Library — mode daftar padat (mockup 03-library-dense).
 // Search memfilter baris nyata (nama/merek). Tag status mengikuti aturan
-// kontras putih: DIPAKAI = fill pink solid + teks on-accent #1A0A12
-// (5.86:1); INGIN COBA = tint netral + teks ink-2 (6.08:1). Tint pink +
-// teks pink tidak dipakai (hanya 4.05:1).
+// kontras putih: DIPAKAI = fill hot pink solid + teks on-accent #1A0A12
+// (5.74:1); INGIN COBA = tint netral + teks ink-2 (6.18:1). Tint hot
+// pink + teks pink tidak dipakai meski kini 4.89:1 — pola fill solid
+// + on-accent dipertahankan.
 // "Tambah botol" = placeholder jujur (Alert Fase 2), bukan layar palsu.
 // Baris bawah "Jelajahi katalog" menavigasi ke Catalog. Bila lemari
 // kosong (0 botol + 0 wishlist), tampil EmptyLibraryState.

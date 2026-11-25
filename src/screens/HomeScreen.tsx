@@ -1,5 +1,5 @@
 // Home — arah D di atas putih.
-// Ground putih; hero GRAFIS (bukan foto): cincin difusi teal + cakram
+// Ground putih; hero GRAFIS (bukan foto): cincin difusi navy + cakram
 // "piringan lapak" dengan monogram H. Foto pasar malam adalah stand-in
 // dan tidak boleh dikirim ke aplikasi (DIRECTION.md) — hero grafis ini
 // yang menggantikannya sampai set foto berlisensi pasar Indonesia ada.

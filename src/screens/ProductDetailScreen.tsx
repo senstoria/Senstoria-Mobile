@@ -1,5 +1,5 @@
 // Product Detail — arah D di atas putih, layar push (tanpa tab bar).
-// Hero grafis: cakram teal + monogram + cincin pink (tanpa foto).
+// Hero grafis: cakram navy + monogram + cincin hot pink (tanpa foto).
 // Tombol Shopee/Tokopedia adalah tautan langsung ke pencarian
 // marketplace — BUKAN tautan afiliasi (B-5 ditunda founder 25 Nov 2026),
 // dan keterangannya ditulis di bawah tombol. Harga = harga referensi

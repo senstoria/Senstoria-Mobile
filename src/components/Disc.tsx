@@ -1,7 +1,7 @@
 // "Piringan lapak" — fallback botol tanpa foto (strategi fallback foto
-// DIRECTION.md): cakram teal + inisial merek (Baloo 2) + cincin. Tidak
+// DIRECTION.md): cakram navy + inisial merek (Baloo 2) + cincin. Tidak
 // pernah kotak abu-abu, tidak pernah foto stand-in di aplikasi.
-// Monogram krem #F7F3EA di atas cakram teal #12262B = 14.17:1.
+// Monogram krem #F7F3EA di atas cakram navy #0F1B3D = 15.24:1.
 import { StyleSheet, Text, View } from 'react-native';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
 import { tokens } from '../theme/tokens';

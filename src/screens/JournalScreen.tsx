@@ -19,7 +19,7 @@ import type { AppNavigationProp } from '../navigation/RootNavigator';
 export default function JournalScreen() {
   const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
-  const { user, bottles, wearLogs, stories, activeBottles, currentlyWearing } = useStore();
+  const { user, bottles, wearLogs, stories, activeBottles, currentlyWearing, compare } = useStore();
   const { locale, t } = useLocale();
   const L = t.mobile.journal;
 
@@ -43,7 +43,7 @@ export default function JournalScreen() {
   return (
     <ScrollView
       style={styles.scroll}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, compare.length > 0 ? styles.contentWithTray : null]}
       showsVerticalScrollIndicator={false}
     >
       <Text style={[styles.title, { fontFamily: displayFontFamily(fontReady) }]}>
@@ -165,6 +165,9 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: tokens.spacing.contentBottom,
   },
+  // Bila tray komparasi tampil (44 + jarak 8), konten bawah diberi ruang
+  // tambahan supaya baris terakhir tidak tertutup tray.
+  contentWithTray: { paddingBottom: tokens.spacing.contentBottom + 52 },
   title: {
     fontSize: tokens.type.title,
     fontWeight: '800',

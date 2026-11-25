@@ -40,7 +40,7 @@ function todayLabel(locale: Locale): string {
 export default function HomeScreen() {
   const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
-  const { user, activeBottles, currentlyWearing, valuationIdr, todayWearFor, logWear, removeTodayWear, signOut } =
+  const { user, activeBottles, currentlyWearing, valuationIdr, compare, todayWearFor, logWear, removeTodayWear, signOut } =
     useStore();
   const { locale, t } = useLocale();
   const L = t.mobile.home;
@@ -92,7 +92,7 @@ export default function HomeScreen() {
   return (
     <ScrollView
       style={styles.scroll}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, compare.length > 0 ? styles.contentWithTray : null]}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.topbar}>
@@ -207,6 +207,9 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: tokens.spacing.contentBottom,
   },
+  // Bila tray komparasi tampil (44 + jarak 8), konten bawah diberi ruang
+  // tambahan supaya baris terakhir tidak tertutup tray.
+  contentWithTray: { paddingBottom: tokens.spacing.contentBottom + 52 },
   topbar: {
     flexDirection: 'row',
     alignItems: 'center',

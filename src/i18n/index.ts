@@ -1353,6 +1353,31 @@ export interface Translations {
       note: string;
       signin: string;
     };
+    compare: {
+      title: string;
+      subtitle: string;
+      emptyTitle: string;
+      emptyBody: string;
+      emptyCta: string;
+      addAria: string;
+      removeAria: string;
+      inCompare: string;
+      compareAction: string;
+      limitTitle: string;
+      limitBody: string;
+      trayLabel: string;
+      trayCta: string;
+      trayAria: string;
+      addSlot: string;
+      attrFamily: string;
+      attrTop: string;
+      attrHeart: string;
+      attrBase: string;
+      attrConcentration: string;
+      attrSize: string;
+      attrPrice: string;
+      noData: string;
+    };
   };
 }
 import { en } from './en';

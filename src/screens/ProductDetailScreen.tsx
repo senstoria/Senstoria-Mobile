@@ -36,13 +36,16 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
   const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
   const perfume = getPerfume(route.params.perfumeId);
-  const { user, bottles, wishlist, todayWearFor, logWear, removeTodayWear } = useStore();
+  const { user, bottles, wishlist, todayWearFor, logWear, removeTodayWear, compare, toggleCompare } =
+    useStore();
   const { locale, t } = useLocale();
   const L = t.mobile.detail;
   const C = t.mobile.common;
+  const CP = t.mobile.compare;
   const bottle = bottles.find((b) => b.perfumeId === perfume.id);
   const inLibrary = bottle !== undefined;
   const inWishlist = wishlist.includes(perfume.id);
+  const inCompare = compare.includes(perfume.id);
   const [favorite, setFavorite] = useState(false);
   const loggedToday = bottle ? todayWearFor(bottle.id) !== undefined : false;
 
@@ -89,6 +92,13 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
     void Share.share({
       message: `${perfume.name} — ${perfume.brand} ${perfume.concentration} ${perfume.sizeMl} ml, ${formatCurrency(perfume.priceIdr, locale)}`,
     });
+  };
+
+  const handleToggleCompare = () => {
+    const result = toggleCompare(perfume.id);
+    if (result === 'full') {
+      Alert.alert(CP.limitTitle, CP.limitBody, [{ text: C.cancel, style: 'cancel' }]);
+    }
   };
 
   return (
@@ -201,6 +211,22 @@ export default function ProductDetailScreen({ route }: { route: DetailRoute }) {
           {loggedToday ? C.logWearCtaLogged : C.logWearCta}
         </Text>
       </PressableScale>
+
+      <Pressable
+        style={[styles.compareBtn, inCompare && styles.compareBtnActive]}
+        onPress={handleToggleCompare}
+        accessibilityRole="button"
+        accessibilityLabel={inCompare ? fmt(CP.removeAria, perfume.name) : fmt(CP.addAria, perfume.name)}
+      >
+        <Ionicons
+          name={inCompare ? 'git-compare' : 'git-compare-outline'}
+          size={19}
+          color={inCompare ? tokens.color.onAccent : tokens.color.ink}
+        />
+        <Text style={[styles.compareBtnText, inCompare && styles.compareBtnTextActive]}>
+          {inCompare ? CP.inCompare : CP.compareAction}
+        </Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -288,4 +314,18 @@ const styles = StyleSheet.create({
     color: tokens.color.onAccent,
   },
   ctaTextLogged: { color: tokens.color.discInk },
+  compareBtn: {
+    marginTop: 12,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: tokens.color.rule,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  compareBtnActive: { backgroundColor: tokens.color.accent, borderColor: tokens.color.accent },
+  compareBtnText: { fontSize: tokens.type.meta, fontWeight: '600', color: tokens.color.ink },
+  compareBtnTextActive: { color: tokens.color.onAccent },
 });

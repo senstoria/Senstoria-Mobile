@@ -1,5 +1,5 @@
 // Root navigator — arah D: tab bar pil mengambang + layar push (tanpa
-// tab bar): Detail, Login, AddBottle, StoryComposer, Finder.
+// tab bar): Detail, Login, AddBottle, StoryComposer, Finder, Compare.
 // React Navigation (native stack + bottom tabs), bukan Expo Router —
 // keputusan scaffold Fase 1. Kerangka Fase 2 (demo, tanpa Firebase):
 // semua layar terhubung lewat stack ini.
@@ -17,6 +17,7 @@ import LoginScreen from '../screens/LoginScreen';
 import AddBottleScreen from '../screens/AddBottleScreen';
 import StoryComposerScreen from '../screens/StoryComposerScreen';
 import FinderScreen from '../screens/FinderScreen';
+import CompareScreen from '../screens/CompareScreen';
 import FloatingTabBar from '../components/TabBar';
 
 export type TabParamList = {
@@ -33,6 +34,7 @@ export type RootStackParamList = {
   AddBottle: { perfumeId?: string };
   StoryComposer: undefined;
   Finder: undefined;
+  Compare: undefined;
 };
 
 /** Tipe navigasi gabungan untuk layar di dalam tab (boleh pindah tab
@@ -68,6 +70,7 @@ export default function RootNavigator() {
       <Stack.Screen name="AddBottle" component={AddBottleScreen} />
       <Stack.Screen name="StoryComposer" component={StoryComposerScreen} />
       <Stack.Screen name="Finder" component={FinderScreen} />
+      <Stack.Screen name="Compare" component={CompareScreen} />
     </Stack.Navigator>
   );
 }

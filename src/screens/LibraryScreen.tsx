@@ -76,7 +76,7 @@ function LibraryRow({
 export default function LibraryScreen() {
   const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
-  const { user, bottles, wishlist, valuationIdr, deleteBottle } = useStore();
+  const { user, bottles, wishlist, valuationIdr, compare, deleteBottle } = useStore();
   const { locale, t } = useLocale();
   const L = t.mobile.library;
   const C = t.mobile.common;
@@ -129,7 +129,7 @@ export default function LibraryScreen() {
   return (
     <ScrollView
       style={styles.scroll}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, compare.length > 0 ? styles.contentWithTray : null]}
       showsVerticalScrollIndicator={false}
     >
       <Text style={[styles.title, { fontFamily: displayFontFamily(fontReady) }]}>
@@ -265,6 +265,9 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: tokens.spacing.contentBottom,
   },
+  // Bila tray komparasi tampil (44 + jarak 8), konten bawah diberi ruang
+  // tambahan supaya baris terakhir tidak tertutup tray.
+  contentWithTray: { paddingBottom: tokens.spacing.contentBottom + 52 },
   emptyHost: { flex: 1, backgroundColor: tokens.color.ground },
   title: {
     fontSize: tokens.type.title,

@@ -61,7 +61,12 @@ export type StoreState = {
   wearLogs: LocalWearLog[];
   stories: LocalStory[];
   wishlist: string[];
+  /** ID parfum yang dipilih untuk komparasi (maks COMPARE_MAX). */
+  compare: string[];
 };
+
+/** Batas komparasi — aturan produk dari PRD/aplikasi web: maks 3 parfum. */
+export const COMPARE_MAX = 3;
 
 const STORAGE_KEY = 'senstoria.demo.v1';
 
@@ -84,6 +89,7 @@ const INITIAL_STATE: StoreState = {
   wearLogs: [],
   stories: [],
   wishlist: [...LIBRARY.wishlist],
+  compare: [],
 };
 
 /** Kunci tanggal lokal YYYY-MM-DD (tanpa jam, tanpa UTC). */
@@ -140,6 +146,9 @@ function parseStored(raw: string | null): StoreState {
       wishlist: Array.isArray(parsed.wishlist)
         ? (parsed.wishlist as string[])
         : INITIAL_STATE.wishlist,
+      compare: Array.isArray(parsed.compare)
+        ? (parsed.compare as unknown[]).filter((id): id is string => typeof id === 'string')
+        : [],
     };
   } catch {
     return INITIAL_STATE;
@@ -177,6 +186,13 @@ type StoreValue = StoreState & {
   logWear: (bottleId: string, perfumeId: string, sprays?: number) => boolean;
   removeTodayWear: (bottleId: string) => void;
   addStory: (input: AddStoryInput) => LocalStory;
+  /**
+   * Tambah/hapus parfum dari komparasi. Nilai balik: 'added' (masuk),
+   * 'removed' (keluar), atau 'full' (sudah 3 — penambahan ke-4 ditolak,
+   * tidak ada yang dibuang diam-diam).
+   */
+  toggleCompare: (perfumeId: string) => 'added' | 'removed' | 'full';
+  removeFromCompare: (perfumeId: string) => void;
 };
 
 const StoreContext = createContext<StoreValue | null>(null);
@@ -299,6 +315,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return story;
   }, []);
 
+  const toggleCompare = useCallback(
+    (perfumeId: string): 'added' | 'removed' | 'full' => {
+      const current = stateRef.current.compare;
+      if (current.includes(perfumeId)) {
+        setState((s) => ({ ...s, compare: s.compare.filter((id) => id !== perfumeId) }));
+        return 'removed';
+      }
+      if (current.length >= COMPARE_MAX) return 'full';
+      setState((s) => ({ ...s, compare: [...s.compare, perfumeId] }));
+      return 'added';
+    },
+    [],
+  );
+
+  const removeFromCompare = useCallback((perfumeId: string) => {
+    setState((s) => ({ ...s, compare: s.compare.filter((id) => id !== perfumeId) }));
+  }, []);
+
   const value = useMemo<StoreValue>(() => {
     const activeBottles = state.bottles.filter((b) => b.status !== 'finished');
     const currentlyWearing =
@@ -323,8 +357,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       logWear,
       removeTodayWear,
       addStory,
+      toggleCompare,
+      removeFromCompare,
     };
-  }, [state, loaded, signInDemo, signOut, addBottle, deleteBottle, logWear, removeTodayWear, addStory]);
+  }, [state, loaded, signInDemo, signOut, addBottle, deleteBottle, logWear, removeTodayWear, addStory, toggleCompare, removeFromCompare]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

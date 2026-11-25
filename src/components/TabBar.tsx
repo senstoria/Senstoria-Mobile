@@ -7,15 +7,21 @@
 // Tab tidak terpilih: ikon + label ink-2 #4A5878 (5.82:1).
 // Posisi absolute mengambang di atas konten; layar memberi
 // paddingBottom 110 (tokens.spacing.contentBottom) agar konten terakhir
-// tidak tertutup tab bar.
+// tidak tertutup tab bar — bila tray komparasi tampil, layar tab
+// menambah 52 (tinggi tray 44 + jarak 8).
+// Tray komparasi (Fase 3): muncul bila 1+ parfum dipilih, mengarah ke
+// layar Compare.
 import { StyleSheet, Text, View } from 'react-native';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PressableScale } from '../lib/feel';
+import { useStore } from '../lib/store';
 import { useLocale } from '../i18n/locale';
+import { fmt } from '../i18n';
 import { tokens } from '../theme/tokens';
-import type { TabParamList } from '../navigation/RootNavigator';
+import type { AppNavigationProp, TabParamList } from '../navigation/RootNavigator';
 
 const TABS: {
   name: keyof TabParamList;
@@ -32,58 +38,89 @@ const TABS: {
 export default function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const { t } = useLocale();
+  const { compare } = useStore();
+  const appNavigation = useNavigation<AppNavigationProp>();
   const tabLabels = t.mobile.tabs;
+  const CP = t.mobile.compare;
   return (
     <View
       style={[
-        styles.bar,
+        styles.wrap,
         { bottom: Math.max(insets.bottom, 16) },
       ]}
     >
-      {state.routes.map((route, index) => {
-        const focused = state.index === index;
-        const tab = TABS.find((t) => t.name === route.name) ?? TABS[0];
-        const label = tabLabels[tab.labelKey];
-        const onPress = () => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
-          if (!focused && !event.defaultPrevented) {
-            navigation.navigate(route.name);
-          }
-        };
-        const color = focused ? tokens.color.onAccent : tokens.color.ink2;
-        return (
-          <PressableScale
-            key={route.key}
-            style={styles.tab}
-            onPress={onPress}
-            accessibilityRole="button"
-            accessibilityState={{ selected: focused }}
-            accessibilityLabel={label}
-          >
-            <View style={[styles.tabInner, focused && styles.tabInnerFocused]}>
-              <Ionicons
-                name={focused ? tab.icon : tab.iconOutline}
-                size={23}
-                color={color}
-              />
-              <Text style={[styles.tabLabel, { color }]}>{label}</Text>
-            </View>
-          </PressableScale>
-        );
-      })}
+      {compare.length > 0 ? (
+        <PressableScale
+          style={styles.tray}
+          onPress={() => appNavigation.navigate('Compare')}
+          accessibilityRole="button"
+          accessibilityLabel={CP.trayAria}
+        >
+          <Text style={styles.trayLabel}>{fmt(CP.trayLabel, compare.length)}</Text>
+          <Text style={styles.trayCta}>{CP.trayCta}</Text>
+          <Ionicons name="chevron-forward" size={18} color={tokens.color.onAccent} />
+        </PressableScale>
+      ) : null}
+      <View style={styles.bar}>
+        {state.routes.map((route, index) => {
+          const focused = state.index === index;
+          const tab = TABS.find((t) => t.name === route.name) ?? TABS[0];
+          const label = tabLabels[tab.labelKey];
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!focused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+          const color = focused ? tokens.color.onAccent : tokens.color.ink2;
+          return (
+            <PressableScale
+              key={route.key}
+              style={styles.tab}
+              onPress={onPress}
+              accessibilityRole="button"
+              accessibilityState={{ selected: focused }}
+              accessibilityLabel={label}
+            >
+              <View style={[styles.tabInner, focused && styles.tabInnerFocused]}>
+                <Ionicons
+                  name={focused ? tab.icon : tab.iconOutline}
+                  size={23}
+                  color={color}
+                />
+                <Text style={[styles.tabLabel, { color }]}>{label}</Text>
+              </View>
+            </PressableScale>
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  bar: {
+  wrap: {
     position: 'absolute',
     left: 20,
     right: 20,
+  },
+  tray: {
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: tokens.color.accent,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    marginBottom: 8,
+  },
+  trayLabel: { flex: 1, fontSize: tokens.type.meta, fontWeight: '600', color: tokens.color.onAccent },
+  trayCta: { fontSize: tokens.type.meta, fontWeight: '700', color: tokens.color.onAccent },
+  bar: {
     height: 62,
     borderRadius: tokens.radius.tabBar,
     backgroundColor: tokens.color.glass,

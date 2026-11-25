@@ -1,6 +1,6 @@
 // Cincin difusi aroma — richness arah D, digambar dengan View (tanpa SVG).
 // Lingkaran konsentris tipis; dekoratif saja (bukan teks, tanpa syarat
-// kontras). Di atas putih, cincin teal sangat redup dan satu cincin pink
+// kontras). Di atas Cream Grey, cincin navy sangat redup dan satu cincin pink
 // aksen. Cincin TIDAK pernah ditaruh di belakang teks (perbaikan final
 // CRITIQUE #2) — ia hidup di zonanya sendiri (hero / empty).
 import { StyleSheet, View, type ViewStyle } from 'react-native';

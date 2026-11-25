@@ -1,10 +1,10 @@
 // Tab bar pil mengambang arah D (mockup: kapsul kaca 62pt, inset 20pt,
-// bottom 34pt, radius 31). Di atas putih: kaca putih + border rule +
-// bayangan lembut; tab terpilih = pill hot pink SOLID dengan ikon + label
-// on-accent #1A0A12 (5.74:1). Pill pink tint + teks pink TIDAK dipakai:
-// accent-text #C2185B di atas tint #FFE3EE = 4.89:1 (lolos, tapi pola
+// bottom 34pt, radius 31). Di atas Cream Grey: kaca putih + border rule +
+// bayangan lembut; tab terpilih = pill Lipstick Pink SOLID dengan ikon + label
+// on-accent #1A0A12 (6.10:1). Pill pink tint + teks pink TIDAK dipakai:
+// accent-text #A32668 di atas tint #FADCEF = 5.45:1 (lolos, tapi pola
 // fill solid dipertahankan).
-// Tab tidak terpilih: ikon + label ink-2 #55617E (6.18:1).
+// Tab tidak terpilih: ikon + label ink-2 #4A5878 (5.82:1).
 // Posisi absolute mengambang di atas konten; layar memberi
 // paddingBottom 110 (tokens.spacing.contentBottom) agar konten terakhir
 // tidak tertutup tab bar.

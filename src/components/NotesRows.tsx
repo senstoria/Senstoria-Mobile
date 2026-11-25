@@ -1,6 +1,6 @@
 // Baris piramida notes TOP / HEART / BASE (mockup: label 11pt caps pink
-// + nilai 13pt). Label memakai accent-text #C2185B (5.87:1 di atas putih —
-// hot pink #FF3D8B hanya 3.34:1, dilarang). Nilai membungkus dengan hanging
+// + nilai 13pt). Label memakai accent-text #A32668 (5.67:1 di atas Cream Grey —
+// Lipstick Pink #EC5CAB hanya 2.58:1, dilarang). Nilai membungkus dengan hanging
 // indent: label 44pt tetap, nilai flex — di 402px "Green Pear" boleh
 // berakhir di tepi kanan (perbaikan final #5, dicatat tidak diubah).
 import { StyleSheet, Text, View } from 'react-native';

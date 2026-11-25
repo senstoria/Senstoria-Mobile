@@ -1,8 +1,8 @@
-// Empty / first-run state — arah D di atas putih.
+// Empty / first-run state — arah D di atas Cream Grey.
 // Tampil sebagai state kondisional saat lemari kosong (0 botol, 0
 // wishlist): "Pasar baru buka." Cincin difusi di belakang konten —
 // komposisi mengikuti mockup (teks di dalam cincin); cincin navy sangat
-// redup (0.09–0.20 di atas putih) sehingga goresannya tidak mengganggu
+// redup (0.09–0.20 di atas Cream Grey) sehingga goresannya tidak mengganggu
 // keterbacaan. Penyesuaian dari mockup: di sini state hidup di dalam
 // tab Library (tab bar tetap terlihat agar pengguna bisa pindah) —
 // mockup menampilkan empty sebagai layar sampul tanpa tab bar.

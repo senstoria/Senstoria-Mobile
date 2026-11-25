@@ -36,6 +36,18 @@ export default function CatalogScreen() {
       <Text style={[styles.title, { fontFamily: displayFontFamily(fontReady) }]}>Katalog</Text>
       <Text style={styles.subtitle}>{PERFUMES.length} parfum terverifikasi.</Text>
 
+      <Pressable
+        style={styles.finderCard}
+        onPress={() => navigation.navigate('Finder')}
+        accessibilityRole="button"
+      >
+        <Text style={styles.finderTitle}>Cari wewangian yang cocok</Text>
+        <Text style={styles.finderSub}>
+          Jawab 7 pertanyaan singkat — skor kecocokan dihitung dari seleramu.
+        </Text>
+        <Text style={styles.finderLink}>Mulai kuis →</Text>
+      </Pressable>
+
       <View style={styles.search}>
         <Ionicons name="search" size={19} color={tokens.color.ink3} />
         <TextInput
@@ -96,6 +108,21 @@ const styles = StyleSheet.create({
     color: tokens.color.ink,
   },
   subtitle: { fontSize: tokens.type.meta, color: tokens.color.ink2, marginTop: 6 },
+  finderCard: {
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: tokens.color.rule,
+    borderRadius: tokens.radius.card,
+    padding: 16,
+  },
+  finderTitle: { fontSize: tokens.type.body, fontWeight: '700', color: tokens.color.ink },
+  finderSub: { fontSize: tokens.type.meta, lineHeight: 21, color: tokens.color.ink2, marginTop: 4 },
+  finderLink: {
+    marginTop: 8,
+    fontSize: tokens.type.meta,
+    fontWeight: '600',
+    color: tokens.color.accentText,
+  },
   search: {
     marginTop: 16,
     height: 44,

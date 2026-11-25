@@ -3,23 +3,17 @@
 // "piringan lapak" dengan monogram H. Foto pasar malam adalah stand-in
 // dan tidak boleh dikirim ke aplikasi (DIRECTION.md) — hero grafis ini
 // yang menggantikannya sampai set foto berlisensi pasar Indonesia ada.
-// Konten nyata: The Perfection (dipakai hari ini, belum dicatat),
-// 1 botol aktif · Rp 350.000, Enchantée di wishlist.
-import { useState } from 'react';
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+// Kerangka Fase 2 (demo, tanpa Firebase): hitungan Perpustakaan dan
+// tombol "Catat pemakaian hari ini" memakai store lokal perangkat.
+// "Wewangian hari ini" = parfum dari botol yang sedang dipakai.
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { PressableScale } from '../lib/feel';
+import { useStore } from '../lib/store';
 import { tokens } from '../theme/tokens';
 import { useDisplayFontReady, displayFontFamily } from '../theme/fonts';
-import { LIBRARY, PERFUMES, formatPriceIdr, getPerfume } from '../data/catalog';
+import { PERFUMES, formatPriceIdr, getPerfume } from '../data/catalog';
 import { Disc } from '../components/Disc';
 import { NotesRows } from '../components/NotesRows';
 import { Rings } from '../components/Rings';
@@ -42,15 +36,54 @@ function todayId(): string {
 export default function HomeScreen() {
   const navigation = useNavigation<AppNavigationProp>();
   const fontReady = useDisplayFontReady();
-  // Status tercatat bersifat lokal (UI saja). Wear log Firestore adalah
-  // langkah Fase 2 — tidak ada klaim penyimpanan di sini.
-  const [loggedToday, setLoggedToday] = useState(false);
+  const { user, activeBottles, currentlyWearing, valuationIdr, todayWearFor, logWear, removeTodayWear, signOut } =
+    useStore();
 
-  const openFinder = () => {
-    Alert.alert(
-      'Scent Finder',
-      'Kuis pencocokan 6 dimensi hadir di Fase 2.',
-    );
+  // Parfum hero = parfum dari botol yang sedang dipakai; bila belum ada
+  // botol, tampilkan The Perfection (parfum demo utama).
+  const heroPerfume = currentlyWearing ? getPerfume(currentlyWearing.perfumeId) : PERFECTION;
+  const loggedToday = currentlyWearing ? todayWearFor(currentlyWearing.id) !== undefined : false;
+
+  const handleLogWear = () => {
+    if (!user) {
+      navigation.navigate('Login');
+      return;
+    }
+    if (!currentlyWearing) {
+      Alert.alert(
+        'Belum ada botol',
+        'Tambah dulu botol ke perpustakaanmu supaya pemakaian bisa dicatat.',
+        [
+          { text: 'Batal', style: 'cancel' },
+          { text: 'Tambah botol', onPress: () => navigation.navigate('AddBottle', {}) },
+        ],
+      );
+      return;
+    }
+    if (loggedToday) {
+      Alert.alert('Sudah tercatat hari ini', `${heroPerfume.name} sudah kamu catat pemakaiannya hari ini.`, [
+        { text: 'Batal', style: 'cancel' },
+        {
+          text: 'Hapus catatan',
+          style: 'destructive',
+          onPress: () => removeTodayWear(currentlyWearing.id),
+        },
+        { text: 'Lihat Jurnal', onPress: () => navigation.navigate('Journal') },
+      ]);
+      return;
+    }
+    logWear(currentlyWearing.id, currentlyWearing.perfumeId);
+  };
+
+  const handleAccount = () => {
+    if (!user) {
+      navigation.navigate('Login');
+      return;
+    }
+    Alert.alert('Akun demo', `Masuk sebagai ${user.email} (mode demo, tersimpan di perangkat ini).`, [
+      { text: 'Batal', style: 'cancel' },
+      { text: 'Keluar', style: 'destructive', onPress: () => signOut() },
+    ]);
   };
 
   return (
@@ -61,14 +94,28 @@ export default function HomeScreen() {
     >
       <View style={styles.topbar}>
         <Text style={styles.date}>{todayId()}</Text>
-        <Pressable
-          style={styles.searchBtn}
-          onPress={() => navigation.navigate('Catalog')}
-          accessibilityRole="button"
-          accessibilityLabel="Cari di katalog"
-        >
-          <Ionicons name="search" size={21} color={tokens.color.ink} />
-        </Pressable>
+        <View style={styles.topbarRight}>
+          <Pressable
+            style={styles.iconBtn}
+            onPress={handleAccount}
+            accessibilityRole="button"
+            accessibilityLabel={user ? `Akun ${user.email}` : 'Masuk'}
+          >
+            <Ionicons
+              name={user ? 'person' : 'person-outline'}
+              size={21}
+              color={user ? tokens.color.accentText : tokens.color.ink}
+            />
+          </Pressable>
+          <Pressable
+            style={styles.iconBtn}
+            onPress={() => navigation.navigate('Catalog')}
+            accessibilityRole="button"
+            accessibilityLabel="Cari di katalog"
+          >
+            <Ionicons name="search" size={21} color={tokens.color.ink} />
+          </Pressable>
+        </View>
       </View>
 
       {/* Hero grafis: cincin difusi + cakram lapak (tanpa foto). */}
@@ -81,7 +128,7 @@ export default function HomeScreen() {
           ]}
         />
         <View style={styles.heroDisc}>
-          <Disc initial={PERFECTION.initial} size={96} fontSize={40} />
+          <Disc initial={heroPerfume.initial} size={96} fontSize={40} />
         </View>
       </View>
 
@@ -92,18 +139,18 @@ export default function HomeScreen() {
           { fontFamily: displayFontFamily(fontReady) },
         ]}
       >
-        The{'\n'}Perfection
+        {heroPerfume.name.split(' ').join('\n')}
       </Text>
       <Text style={styles.meta}>
-        {PERFECTION.brand} · {PERFECTION.concentration} · {PERFECTION.sizeMl} ml ·{' '}
-        {formatPriceIdr(PERFECTION.priceIdr)}
+        {heroPerfume.brand} · {heroPerfume.concentration} · {heroPerfume.sizeMl} ml ·{' '}
+        {formatPriceIdr(heroPerfume.priceIdr)}
       </Text>
 
-      <NotesRows notes={PERFECTION.notes} />
+      <NotesRows notes={heroPerfume.notes} />
 
       <PressableScale
         style={[styles.cta, loggedToday && styles.ctaLogged]}
-        onPress={() => setLoggedToday((v) => !v)}
+        onPress={handleLogWear}
         accessibilityRole="button"
         accessibilityLabel={loggedToday ? 'Tercatat hari ini' : 'Catat pemakaian hari ini'}
       >
@@ -120,7 +167,7 @@ export default function HomeScreen() {
         >
           <Text style={styles.srowKey}>Perpustakaan</Text>
           <Text style={styles.srowValue}>
-            {LIBRARY.bottles.length} botol aktif · {formatPriceIdr(LIBRARY.valuationIdr)}
+            {activeBottles.length} botol aktif · {formatPriceIdr(valuationIdr)}
           </Text>
         </Pressable>
         <Pressable
@@ -136,9 +183,14 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      <Pressable onPress={openFinder} accessibilityRole="button">
+      <Pressable onPress={() => navigation.navigate('Finder')} accessibilityRole="button">
         <Text style={styles.finder}>Cari wewangian yang cocok →</Text>
       </Pressable>
+      {!user ? (
+        <Pressable onPress={() => navigation.navigate('Login')} accessibilityRole="button">
+          <Text style={styles.loginHint}>Masuk untuk menyimpan perpustakaanmu →</Text>
+        </Pressable>
+      ) : null}
     </ScrollView>
   );
 }
@@ -155,13 +207,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  topbarRight: { flexDirection: 'row', gap: 8 },
   date: {
     fontSize: tokens.type.caps,
     fontWeight: '700',
     letterSpacing: 1.5,
     color: tokens.color.ink3,
   },
-  searchBtn: {
+  iconBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -233,5 +286,11 @@ const styles = StyleSheet.create({
     fontSize: tokens.type.meta,
     fontWeight: '600',
     color: tokens.color.accentText,
+  },
+  loginHint: {
+    marginTop: 12,
+    fontSize: tokens.type.meta,
+    fontWeight: '600',
+    color: tokens.color.ink2,
   },
 });
